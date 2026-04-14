@@ -1,0 +1,45 @@
+# Compilação
+*.class
+
+# Arquivos JAR/WAR/EAR
+*.jar
+*.war
+*.ear
+
+# Logs
+*.log
+
+# Diretórios de build
+target/        # Maven
+build/         # Gradle
+out/           # IntelliJ
+
+# Arquivos temporários
+*.tmp
+*.temp
+
+# Cache do sistema
+.DS_Store
+Thumbs.db
+
+# IDEs
+# Eclipse
+.project
+.classpath
+.settings/
+
+# IntelliJ
+.idea/
+*.iml
+
+# VS Code
+.vscode/
+
+# Arquivos de ambiente
+.env
+
+# Cobertura de testes
+coverage/
+
+# Arquivos de configuração locais
+*.local
