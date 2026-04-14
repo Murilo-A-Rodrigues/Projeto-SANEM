@@ -1,10 +1,19 @@
 # Projeto-SANEM
 
+Este é um projeto que consiste em criar um aplicativo para gerenciar as doações recebidas e repassadas pela SANEM. O código vem sendo construído ao longo de 3 semestres, sendo 2026/1 o último.
 
-Integrantes do projeto:   Função:
-Victor hugo wille         Backend
-Murilo Andre Rodrigues    Scrum Master
-Linguagem utilizada:
-Java
-Este é um projeto que consiste em criar um aplicativo para gerenciar as doações recebidas e repassadas pela SANEM, o código do projeto vem sendo construido ao longo de 2 semestres com o semestre de 2026/1 sendo o terceiro e último semestre para realização do projeto.
+## 👥 Equipe
+Este projeto está sendo desenvolvido por:
 
+* **Gustavo Finkler Haas**
+    * **Função:** Responsável pelo Front-end.
+    * **Responsabilidades:** Desenvolvimento de interface (UI) e experiência do usuário (UX).
+
+* **Victor Hugo Wille**
+    * **Função:** Backend.
+
+* **Murilo Andre Rodrigues**
+    * **Função:** Scrum Master.
+
+## 🛠️ Tecnologias
+* **Linguagem:** Java
