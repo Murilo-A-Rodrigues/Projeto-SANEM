@@ -1,0 +1,107 @@
+.container {
+  min-height: 100vh;
+  background: #f5f6fa;
+  margin-left: 220px; /* largura do Navigation */
+}
+
+.main {
+  padding-top: 72px; /* altura do MenuBar */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 80vh;
+}
+
+.title {
+  font-size: 2rem;
+  margin-bottom: 16px;
+  color: #444;
+}
+
+.description {
+  font-size: 1.2rem;
+  color: #444;
+}
+
+.donationImage {
+  margin-bottom: 24px;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+  max-width: 100%;
+  height: auto;
+}
+
+.effectPhrase {
+  font-size: 1.3rem;
+  color: #1976d2;
+  font-weight: 600;
+  margin-bottom: 32px;
+  text-align: center;
+}
+
+.gridNav {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+  margin: 32px 0 24px 0;
+  width: 100%;
+  max-width: 800px;
+}
+
+.gridNavItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(25, 118, 210, 0.08);
+  padding: 24px 8px 16px 8px;
+  text-decoration: none;
+  color: #222;
+  font-size: 1.05rem;
+  font-weight: 600;
+  transition: box-shadow 0.2s, background 0.2s;
+}
+
+.gridNavItem:hover {
+  background: #e9eafd;
+  box-shadow: 0 4px 16px rgba(25, 118, 210, 0.15);
+  color: #1976d2;
+}
+
+.gridNavItem span {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+@media (max-width: 1000px) {
+  .gridNav {
+    grid-template-columns: repeat(3, 1fr);
+    max-width: 600px;
+  }
+}
+
+@media (max-width: 700px) {
+  .gridNav {
+    grid-template-columns: repeat(2, 1fr);
+    max-width: 400px;
+  }
+}
+
+@media (max-width: 480px) {
+  .main {
+    padding-top: 32px;
+  }
+  .gridNav {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    max-width: 260px;
+  }
+  .donationImage {
+    width: 100%;
+    height: auto;
+  }
+}
