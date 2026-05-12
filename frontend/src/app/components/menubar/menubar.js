@@ -1,7 +1,20 @@
+"use client";
+
 import styles from './menuBar.module.css';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 
 export default function MenuBar({ hasNotification }) {
+  const router = useRouter();
+
+  const handleLogout = () => {
+    if (confirm("Tem certeza que deseja fazer logout?")) {
+      localStorage.clear();
+      sessionStorage.clear();
+      router.push('/');
+    }
+  };
+
   return (
     <header className={styles.menuBar}>
       <div className={styles.rightSection}>
@@ -13,7 +26,7 @@ export default function MenuBar({ hasNotification }) {
         <div className={styles.iconWrapper} style={{ position: 'relative' }}>
         </div>
         <div className={styles.iconWrapper}>
-          <LogoutIcon />
+          <LogoutIcon onLogout={handleLogout} />
         </div>
       </div>
     </header>
@@ -32,14 +45,27 @@ function UserIcon() {
     );
 }
 
-function LogoutIcon() {
+function LogoutIcon({ onLogout }) {
     return (
-        <Image
-            src="/logout-icon.png"
-            alt="Logout"
-            width={24}
-            height={24}
-            style={{ marginRight: 12 }}
-        />
+        <button
+            onClick={onLogout}
+            style={{
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                padding: 0,
+                display: 'flex',
+                alignItems: 'center'
+            }}
+            title="Fazer logout"
+        >
+            <Image
+                src="/logout-icon.png"
+                alt="Logout"
+                width={24}
+                height={24}
+                style={{ marginRight: 12 }}
+            />
+        </button>
     );
 }

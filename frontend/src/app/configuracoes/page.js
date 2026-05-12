@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import Navigation from "../components/navegation/navegation";
 import MenuBar from "../components/menubar/menubar";
 
@@ -10,6 +11,9 @@ export default function ConfiguracoesPage() {
   const [senhaAtual, setSenhaAtual] = useState("");
   const [novaSenha, setNovaSenha] = useState("");
   const [confirmarSenha, setConfirmarSenha] = useState("");
+  const [showSenhaAtual, setShowSenhaAtual] = useState(false);
+  const [showNovaSenha, setShowNovaSenha] = useState(false);
+  const [showConfirmarSenha, setShowConfirmarSenha] = useState(false);
 
   function handleSaveProfile() {
     console.log("Salvar nome + descrição", { nome, descricao });
@@ -119,46 +123,118 @@ export default function ConfiguracoesPage() {
             <h2 style={{ marginBottom: 20 }}>Alterar Senha</h2>
 
             <label style={{ fontWeight: "bold" }}>Senha Atual:</label>
-            <input
-              type="password"
-              value={senhaAtual}
-              onChange={(e) => setSenhaAtual(e.target.value)}
-              style={{
-                width: "100%",
-                padding: 10,
-                marginBottom: 20,
-                borderRadius: 6,
-                border: "1px solid #ccc",
-              }}
-            />
+            <div style={{ position: 'relative', marginBottom: 20 }}>
+              <input
+                type={showSenhaAtual ? "text" : "password"}
+                value={senhaAtual}
+                onChange={(e) => setSenhaAtual(e.target.value)}
+                style={{
+                  width: "100%",
+                  padding: "10px 40px 10px 10px",
+                  borderRadius: 6,
+                  border: "1px solid #ccc",
+                }}
+              />
+              <button
+                type="button"
+                onClick={() => setShowSenhaAtual(!showSenhaAtual)}
+                style={{
+                  position: 'absolute',
+                  right: 12,
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  padding: 0,
+                  display: 'flex',
+                  alignItems: 'center'
+                }}
+              >
+                <Image
+                  src={showSenhaAtual ? '/show.png' : '/hide.png'}
+                  alt={showSenhaAtual ? 'Ocultar senha' : 'Mostrar senha'}
+                  width={20}
+                  height={20}
+                />
+              </button>
+            </div>
 
             <label style={{ fontWeight: "bold" }}>Nova Senha:</label>
-            <input
-              type="password"
-              value={novaSenha}
-              onChange={(e) => setNovaSenha(e.target.value)}
-              style={{
-                width: "100%",
-                padding: 10,
-                marginBottom: 20,
-                borderRadius: 6,
-                border: "1px solid #ccc",
-              }}
-            />
+            <div style={{ position: 'relative', marginBottom: 20 }}>
+              <input
+                type={showNovaSenha ? "text" : "password"}
+                value={novaSenha}
+                onChange={(e) => setNovaSenha(e.target.value)}
+                style={{
+                  width: "100%",
+                  padding: "10px 40px 10px 10px",
+                  borderRadius: 6,
+                  border: "1px solid #ccc",
+                }}
+              />
+              <button
+                type="button"
+                onClick={() => setShowNovaSenha(!showNovaSenha)}
+                style={{
+                  position: 'absolute',
+                  right: 12,
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  padding: 0,
+                  display: 'flex',
+                  alignItems: 'center'
+                }}
+              >
+                <Image
+                  src={showNovaSenha ? '/show.png' : '/hide.png'}
+                  alt={showNovaSenha ? 'Ocultar senha' : 'Mostrar senha'}
+                  width={20}
+                  height={20}
+                />
+              </button>
+            </div>
 
             <label style={{ fontWeight: "bold" }}>Confirmar Nova Senha:</label>
-            <input
-              type="password"
-              value={confirmarSenha}
-              onChange={(e) => setConfirmarSenha(e.target.value)}
-              style={{
-                width: "100%",
-                padding: 10,
-                borderRadius: 6,
-                border: "1px solid #ccc",
-                marginBottom: 20,
-              }}
-            />
+            <div style={{ position: 'relative', marginBottom: 20 }}>
+              <input
+                type={showConfirmarSenha ? "text" : "password"}
+                value={confirmarSenha}
+                onChange={(e) => setConfirmarSenha(e.target.value)}
+                style={{
+                  width: "100%",
+                  padding: "10px 40px 10px 10px",
+                  borderRadius: 6,
+                  border: "1px solid #ccc",
+                }}
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirmarSenha(!showConfirmarSenha)}
+                style={{
+                  position: 'absolute',
+                  right: 12,
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  padding: 0,
+                  display: 'flex',
+                  alignItems: 'center'
+                }}
+              >
+                <Image
+                  src={showConfirmarSenha ? '/show.png' : '/hide.png'}
+                  alt={showConfirmarSenha ? 'Ocultar senha' : 'Mostrar senha'}
+                  width={20}
+                  height={20}
+                />
+              </button>
+            </div>
 
             <button
               onClick={handleChangePassword}

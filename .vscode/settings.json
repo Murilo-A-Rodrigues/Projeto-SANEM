@@ -2,5 +2,9 @@
     "java.compile.nullAnalysis.mode": "automatic",
     "java.project.sourcePaths": [
         "frontend/src/app"
-    ]
+    ],
+    "chat.tools.terminal.autoApprove": {
+        "npm install": true,
+        "npm run dev": true
+    }
 }
