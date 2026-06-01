@@ -5,6 +5,8 @@ import { mockEstoque as mockEstoqueOrig } from "../../mocks/mockEstoque";
 import styles from "./estoque.module.css";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
+import { isEstoqueBaixo, getTotalEstoque } from "../../utils/estoqueUtils";
 
 const STORAGE_KEY = "mockEstoque";
 
@@ -13,6 +15,8 @@ export default function EstoquePage() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [itemToDelete, setItemToDelete] = useState(null);
+  const [estoqueBaixo, setEstoqueBaixo] = useState(false);
+  const [showAlert, setShowAlert] = useState(false);
   const [novoProduto, setNovoProduto] = useState({
     nome: "",
     categoria: "",
@@ -27,7 +31,6 @@ export default function EstoquePage() {
     quantidade: "",
   });
   const router = useRouter();
-  const hasNotification = false;
 
   // 🔹 Carrega do localStorage ou, se não tiver, inicializa com o mock do arquivo
   useEffect(() => {
@@ -39,6 +42,11 @@ export default function EstoquePage() {
         const parsed = JSON.parse(stored);
         if (Array.isArray(parsed)) {
           setMockEstoque(parsed);
+          const baixo = isEstoqueBaixo(parsed);
+          setEstoqueBaixo(baixo);
+          if (baixo) {
+            setShowAlert(true);
+          }
           return;
         }
       }
@@ -49,11 +57,18 @@ export default function EstoquePage() {
     // fallback: mock original
     setMockEstoque(mockEstoqueOrig);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(mockEstoqueOrig));
+    const baixo = isEstoqueBaixo(mockEstoqueOrig);
+    setEstoqueBaixo(baixo);
+    if (baixo) {
+      setShowAlert(true);
+    }
   }, []);
 
   function salvarNoStorage(updated) {
     if (typeof window === "undefined") return;
     localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+    const baixo = isEstoqueBaixo(updated);
+    setEstoqueBaixo(baixo);
   }
 
   function handleAddProduto(e) {
@@ -135,7 +150,65 @@ export default function EstoquePage() {
     <>
       <Navigation />
       <div className={styles.container}>
-        <MenuBar hasNotification={hasNotification} />
+        <MenuBar onEstoqueBaixo={setEstoqueBaixo} />
+        
+        {showAlert && estoqueBaixo && (
+          <div style={{
+            position: 'fixed',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            background: '#fff',
+            border: '2px solid #ff9800',
+            borderRadius: 8,
+            padding: 24,
+            boxShadow: '0 4px 16px rgba(0,0,0,0.2)',
+            zIndex: 1000,
+            maxWidth: 400,
+            textAlign: 'center'
+          }}>
+            <Image
+              src="/warning.png"
+              alt="Aviso"
+              width={48}
+              height={48}
+              style={{ marginBottom: 16 }}
+            />
+            <h2 style={{ color: '#ff9800', marginBottom: 8 }}>⚠️ Estoque Baixo!</h2>
+            <p style={{ color: '#666', marginBottom: 16, fontSize: 14 }}>
+              A quantidade total de peças em estoque está inferior a 10 unidades. 
+              Total atual: <strong>{getTotalEstoque(mockEstoque)}</strong> peças
+            </p>
+            <button
+              onClick={() => setShowAlert(false)}
+              style={{
+                padding: '10px 24px',
+                background: '#ff9800',
+                color: '#fff',
+                border: 'none',
+                borderRadius: 6,
+                cursor: 'pointer',
+                fontSize: 14,
+                fontWeight: 'bold'
+              }}
+            >
+              Entendi
+            </button>
+          </div>
+        )}
+
+        {showAlert && estoqueBaixo && (
+          <div style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(0,0,0,0.4)',
+            zIndex: 999
+          }} onClick={() => setShowAlert(false)} />
+        )}
+        
         <main className={styles.main}>
           <h1 className={styles.titulo}>Controle de Estoque</h1>
           <div

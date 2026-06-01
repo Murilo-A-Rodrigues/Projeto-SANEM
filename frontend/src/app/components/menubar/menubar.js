@@ -1,11 +1,35 @@
 "use client";
 
+import { useEffect, useState } from 'react';
 import styles from './menuBar.module.css';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import { isEstoqueBaixo } from '../../utils/estoqueUtils';
 
-export default function MenuBar({ hasNotification }) {
+const STORAGE_KEY = "mockEstoque";
+
+export default function MenuBar({ hasNotification: initialNotification, onEstoqueBaixo }) {
   const router = useRouter();
+  const [hasNotification, setHasNotification] = useState(initialNotification || false);
+
+  useEffect(() => {
+    // Verifica o estoque do localStorage
+    if (typeof window === "undefined") return;
+    
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (stored) {
+        const items = JSON.parse(stored);
+        const baixo = isEstoqueBaixo(items);
+        setHasNotification(baixo);
+        if (onEstoqueBaixo) {
+          onEstoqueBaixo(baixo);
+        }
+      }
+    } catch (e) {
+      console.error("Erro verificando estoque:", e);
+    }
+  }, [onEstoqueBaixo]);
 
   const handleLogout = () => {
     if (confirm("Tem certeza que deseja fazer logout?")) {
@@ -24,6 +48,16 @@ export default function MenuBar({ hasNotification }) {
           <span className={styles.arrowDown}>▼</span>
         </div>
         <div className={styles.iconWrapper} style={{ position: 'relative' }}>
+          {hasNotification && (
+            <div title="Estoque baixo! Quantidade total < 10 peças">
+              <Image
+                src="/warning.png"
+                alt="Alerta estoque"
+                width={24}
+                height={24}
+              />
+            </div>
+          )}
         </div>
         <div className={styles.iconWrapper}>
           <LogoutIcon onLogout={handleLogout} />
