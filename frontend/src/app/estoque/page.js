@@ -5,6 +5,7 @@ import { mockEstoque as mockEstoqueOrig } from "../../mocks/mockEstoque";
 import styles from "./estoque.module.css";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { isEstoqueBaixo, getTotalEstoque } from '../../utils/estoqueUtils';
 
 const STORAGE_KEY = "mockEstoque";
 
@@ -13,6 +14,7 @@ export default function EstoquePage() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [itemToDelete, setItemToDelete] = useState(null);
+  const [estoqueBaixo, setEstoqueBaixo] = useState(false);
   const [novoProduto, setNovoProduto] = useState({
     nome: "",
     categoria: "",
@@ -27,7 +29,6 @@ export default function EstoquePage() {
     quantidade: "",
   });
   const router = useRouter();
-  const hasNotification = false;
 
   // 🔹 Carrega do localStorage ou, se não tiver, inicializa com o mock do arquivo
   useEffect(() => {
@@ -39,6 +40,8 @@ export default function EstoquePage() {
         const parsed = JSON.parse(stored);
         if (Array.isArray(parsed)) {
           setMockEstoque(parsed);
+          const baixo = isEstoqueBaixo(parsed);
+          setEstoqueBaixo(baixo);
           return;
         }
       }
@@ -49,11 +52,15 @@ export default function EstoquePage() {
     // fallback: mock original
     setMockEstoque(mockEstoqueOrig);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(mockEstoqueOrig));
+    const baixo = isEstoqueBaixo(mockEstoqueOrig);
+    setEstoqueBaixo(baixo);
   }, []);
 
   function salvarNoStorage(updated) {
     if (typeof window === "undefined") return;
     localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+    const baixo = isEstoqueBaixo(updated);
+    setEstoqueBaixo(baixo);
   }
 
   function handleAddProduto(e) {
@@ -135,7 +142,10 @@ export default function EstoquePage() {
     <>
       <Navigation />
       <div className={styles.container}>
-        <MenuBar hasNotification={hasNotification} />
+        <MenuBar onEstoqueBaixo={setEstoqueBaixo} />
+        
+        {/* Alerta de estoque baixo removido - aparece apenas na home após login */}
+        
         <main className={styles.main}>
           <h1 className={styles.titulo}>Controle de Estoque</h1>
           <div

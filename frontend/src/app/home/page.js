@@ -1,13 +1,44 @@
+"use client";
+
 import MenuBar from '../components/menubar/menubar';
 import Image from 'next/image';
 import Link from 'next/link';
 import Navigation from '../components/navegation/navegation';
 import styles from './home.module.css';
 import { FaHome, FaUserPlus, FaBoxes, FaHandHoldingHeart, FaUsers, FaUserFriends, FaChartBar, FaCog } from 'react-icons/fa';
+import { useState, useEffect } from 'react';
+import { isEstoqueBaixo } from '../../utils/estoqueUtils';
+
+const STORAGE_KEY = "mockEstoque";
+const LOGIN_MARKER = "hasLoggedInToday";
 
 export default function Home() {
-  // Simulação: troque para true/false para testar
-  const hasNotification = true;
+  const [estoqueBaixo, setEstoqueBaixo] = useState(false);
+  const [showAlert, setShowAlert] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    
+    // Verifica se é primeira vez que entra na home (após login)
+    const hasLogged = localStorage.getItem(LOGIN_MARKER);
+    
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (stored) {
+        const items = JSON.parse(stored);
+        const baixo = isEstoqueBaixo(items);
+        setEstoqueBaixo(baixo);
+        
+        // Só mostra popup se estoque está baixo E é primeira vez que entra
+        if (baixo && !hasLogged) {
+          setShowAlert(true);
+          localStorage.setItem(LOGIN_MARKER, "true");
+        }
+      }
+    } catch (e) {
+      console.error("Erro verificando estoque:", e);
+    }
+  }, []);
 
   // Opções de navegação para o grid (removido Usuários)
   const navOptions = [
@@ -24,7 +55,88 @@ export default function Home() {
   return (
     <div className={styles.container}>
       <Navigation />
-      <MenuBar hasNotification={hasNotification} />
+      <MenuBar onEstoqueBaixo={setEstoqueBaixo} />
+      
+      {showAlert && estoqueBaixo && (
+        <div style={{
+          position: 'fixed',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          background: '#fff',
+          border: '2px solid #ff9800',
+          borderRadius: 8,
+          padding: 24,
+          boxShadow: '0 4px 16px rgba(0,0,0,0.2)',
+          zIndex: 1000,
+          maxWidth: 400,
+          textAlign: 'center'
+        }}>
+          <Image
+            src="/warning.png"
+            alt="Aviso"
+            width={48}
+            height={48}
+            style={{ marginBottom: 16 }}
+          />
+          <h2 style={{ color: '#ff9800', marginBottom: 8 }}>⚠️ Estoque Baixo!</h2>
+          <p style={{ color: '#666', marginBottom: 16, fontSize: 14 }}>
+            A quantidade total de peças em estoque está inferior a 10 unidades. 
+            Por favor, reponha o estoque.
+          </p>
+          <p style={{ color: '#666', marginBottom: 20, fontSize: 13, fontWeight: 'bold' }}>
+            Deseja cadastrar uma doação?
+          </p>
+          <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
+            <button
+              onClick={() => setShowAlert(false)}
+              style={{
+                padding: '10px 20px',
+                background: '#ccc',
+                color: '#333',
+                border: 'none',
+                borderRadius: 6,
+                cursor: 'pointer',
+                fontSize: 14,
+                fontWeight: 'bold'
+              }}
+            >
+              Agora Não
+            </button>
+            <Link
+              href="/cadastrodoador"
+              style={{
+                padding: '10px 20px',
+                background: '#ff9800',
+                color: '#fff',
+                border: 'none',
+                borderRadius: 6,
+                cursor: 'pointer',
+                fontSize: 14,
+                fontWeight: 'bold',
+                textDecoration: 'none',
+                display: 'inline-block'
+              }}
+              onClick={() => setShowAlert(false)}
+            >
+              Cadastrar Doação
+            </Link>
+          </div>
+        </div>
+      )}
+
+      {showAlert && estoqueBaixo && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0,0,0,0.4)',
+          zIndex: 999
+        }} onClick={() => setShowAlert(false)} />
+      )}
+
       <main className={styles.main}>
         <Image
           src="/doantion.jpg"
