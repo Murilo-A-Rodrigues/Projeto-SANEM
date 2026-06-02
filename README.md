@@ -1,10 +1,14 @@
-# Projeto-SANEM
+### Oficina-Desenvolvimento - Don't Commit Together
+Repositório para a disciplina Oficina de Desenvolvimento de Software na UTFPR-Medianeira - 2025/2 
+Integrantes:
+Ana Cecilia
+Gabriel Zimmer
+Ricardo Simoni 
+Kaique
 
+O objetivo do projeto: Desenvolver um software para suprir as necessidades da SANEM, estas sendo gerir o estoque de doacoes e usuarios.
 
-Integrantes do projeto:   Função:
-Victor hugo wille         Backend
-Murilo Andre Rodrigues    Scrum Master
-Linguagem utilizada:
-Java
-Este é um projeto que consiste em criar um aplicativo para gerenciar as doações recebidas e repassadas pela SANEM, o código do projeto vem sendo construido ao longo de 2 semestres com o semestre de 2026/1 sendo o terceiro e último semestre para realização do projeto.
-
+Stack Tecnológica
+● Front-end: Next.js (React)
+● Back-end: Java Spring Boot
+● Banco de Dados: PostgreSQL
