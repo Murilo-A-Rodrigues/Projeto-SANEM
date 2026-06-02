@@ -1,6 +1,8 @@
 package com.oficina_dev.backend.dtos.Voluntary;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -10,13 +12,14 @@ import java.util.UUID;
 @Getter
 public class VoluntaryRequestDto {
 
-    @NotBlank
-    UUID personId;
+    @NotNull
+    private UUID personId;
 
     @NotBlank
-    String password;
+    private String password;
 
-    @NotBlank
-    Boolean isActive;
+    @NotNull
+    @JsonProperty("isActive")
+    private Boolean isActive;
 
 }

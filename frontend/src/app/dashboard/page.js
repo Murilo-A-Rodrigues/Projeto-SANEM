@@ -10,6 +10,9 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
+import { voluntaryService } from "../../voluntaryService";
+import { receiverService } from "../../receiverService";
+import { giverService } from "../../giverService";
 
 export default function DashboardPage() {
   const [stats, setStats] = useState({
@@ -40,67 +43,70 @@ export default function DashboardPage() {
   useEffect(() => {
     if (typeof window === "undefined") return;
 
-    try {
-      const voluntarios = JSON.parse(
-        localStorage.getItem("mockVoluntarios") || "[]"
-      );
-      const beneficiarios = JSON.parse(
-        localStorage.getItem("mockBeneficiarios") || "[]"
-      );
-      const doadores = JSON.parse(
-        localStorage.getItem("mockDoadores") || "[]"
-      );
-      const estoque = JSON.parse(
-        localStorage.getItem("mockEstoque") || "[]"
-      );
-
-      let doacoesRaw = [];
+    const loadData = async () => {
       try {
-        doacoesRaw = JSON.parse(
-          localStorage.getItem("mockDoacoes") || "[]"
+        // Fetch data from real API
+        const [voluntarios, beneficiarios, doadores] = await Promise.all([
+          voluntaryService.getAll().catch(() => []),
+          receiverService.getAll().catch(() => []),
+          giverService.getAll().catch(() => []),
+        ]);
+
+        // Get estoque and doacoes from localStorage as fallback (or API if available)
+        const estoque = JSON.parse(
+          localStorage.getItem("mockEstoque") || "[]"
         );
-      } catch {
-        doacoesRaw = [];
-      }
 
-      const peopleCount =
-        voluntarios.length + beneficiarios.length + doadores.length;
+        let doacoesRaw = [];
+        try {
+          doacoesRaw = JSON.parse(
+            localStorage.getItem("mockDoacoes") || "[]"
+          );
+        } catch {
+          doacoesRaw = [];
+        }
 
-      const itemsUnits = (estoque || []).reduce(
-        (acc, item) => acc + getItemQuantity(item),
-        0
-      );
+        const peopleCount =
+          voluntarios.length + beneficiarios.length + doadores.length;
 
-      setStats({
-        people: peopleCount,
-        donations: doacoesRaw.length,
-        receivers: beneficiarios.length,
-        volunteers: voluntarios.length,
-        givers: doadores.length,
-        items: itemsUnits,
-      });
+        const itemsUnits = (estoque || []).reduce(
+          (acc, item) => acc + getItemQuantity(item),
+          0
+        );
 
-      const doacoesNormalizadas = (doacoesRaw || [])
-        .map((d) => ({
-          user: d.user ?? d.nomeDoador ?? "Doador",
-          action: d.action ?? "Doação registrada",
-          date: normalizeDate(d),
-        }))
-        .sort((a, b) => {
-          const da = a.date ? new Date(a.date).getTime() : 0;
-          const db = b.date ? new Date(b.date).getTime() : 0;
-          return db - da;
+        setStats({
+          people: peopleCount,
+          donations: doacoesRaw.length,
+          receivers: beneficiarios.length,
+          volunteers: voluntarios.length,
+          givers: doadores.length,
+          items: itemsUnits,
         });
 
-      setRecentActions(doacoesNormalizadas.slice(0, 3));
+        const doacoesNormalizadas = (doacoesRaw || [])
+          .map((d) => ({
+            user: d.user ?? d.nomeDoador ?? "Doador",
+            action: d.action ?? "Doação registrada",
+            date: normalizeDate(d),
+          }))
+          .sort((a, b) => {
+            const da = a.date ? new Date(a.date).getTime() : 0;
+            const db = b.date ? new Date(b.date).getTime() : 0;
+            return db - da;
+          });
 
-      const donationsForChart = doacoesNormalizadas.map((d) => ({
-        date: d.date,
-      }));
-      setChartData(groupByMonth(donationsForChart, 12)); // 👈 12 meses
-    } catch (err) {
-      console.error("Erro ao ler dados do localStorage:", err);
-    }
+        setRecentActions(doacoesNormalizadas.slice(0, 3));
+
+        const donationsForChart = doacoesNormalizadas.map((d) => ({
+          date: d.date,
+        }));
+        setChartData(groupByMonth(donationsForChart, 12)); // 👈 12 meses
+      } catch (err) {
+        console.error("Erro ao carregar dados do dashboard:", err);
+      }
+    };
+
+    loadData();
   }, []);
 
   return (

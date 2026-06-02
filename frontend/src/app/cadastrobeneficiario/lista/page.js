@@ -2,12 +2,10 @@
 import React, { useEffect, useState } from "react";
 import MenuBar from "../../components/menubar/menubar";
 import Navigation from "../../components/navegation/navegation";
-// Importar o CSS Modules específico para a lista
 import styles from "./lista.module.css";
-// Se você mantiver o formContainer no styles de cadastrobeneficiario, importe-o também
-// import formStyles from "../cadastrobeneficiario.module.css";
 import { useRouter } from "next/navigation";
 import modalStyles from "./lista.module.css";
+import { receiverService } from "../../../receiverService";
 
 export default function ListaBeneficiarios() {
   const [beneficiarios, setBeneficiarios] = useState([]); // [{id, nomeCompleto, email, telefoneCelular, nif, ...}]
@@ -20,33 +18,38 @@ export default function ListaBeneficiarios() {
   const [editLoading, setEditLoading] = useState(false);
 
   useEffect(() => {
+    carregarBeneficiarios();
+  }, []);
+
+  const carregarBeneficiarios = async () => {
     setLoading(true);
     setError("");
     try {
-      const mock = JSON.parse(localStorage.getItem('mockBeneficiarios') || '[]');
-      setBeneficiarios(mock);
+      const data = await receiverService.getAll();
+      setBeneficiarios(data);
     } catch (err) {
-      setError("Erro ao carregar beneficiários do mock");
+      setError(err?.message || "Erro ao carregar beneficiários");
+      console.error("Erro ao carregar beneficiários:", err);
     } finally {
       setLoading(false);
     }
-  }, []);
+  };
 
   const handleEdit = (id) => {
     router.push(`/cadastrobeneficiario/editar/${id}`);
   };
 
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
     if (!window.confirm("Tem certeza que deseja excluir este beneficiário?")) return;
     setLoading(true);
     setError("");
     try {
-      const novos = beneficiarios.filter((b) => b.id !== id);
-      setBeneficiarios(novos);
-      localStorage.setItem('mockBeneficiarios', JSON.stringify(novos));
+      await receiverService.delete(id);
+      setBeneficiarios(beneficiarios.filter((b) => b.id !== id));
       alert("Beneficiário excluído com sucesso!");
     } catch (err) {
-      setError("Erro ao excluir beneficiário");
+      setError(err?.message || "Erro ao excluir beneficiário");
+      console.error("Erro ao excluir beneficiário:", err);
     } finally {
       setLoading(false);
     }

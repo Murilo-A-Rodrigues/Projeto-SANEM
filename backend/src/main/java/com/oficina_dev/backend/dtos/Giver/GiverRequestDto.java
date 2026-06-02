@@ -1,6 +1,6 @@
 package com.oficina_dev.backend.dtos.Giver;
 
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 
 import java.util.UUID;
@@ -8,7 +8,7 @@ import java.util.UUID;
 @Getter
 public class GiverRequestDto {
 
-    @NotBlank
+    @NotNull
     UUID personId;
 
 }

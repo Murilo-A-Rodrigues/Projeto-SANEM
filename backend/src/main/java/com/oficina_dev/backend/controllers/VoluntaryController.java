@@ -3,6 +3,8 @@ package com.oficina_dev.backend.controllers;
 import com.oficina_dev.backend.dtos.Voluntary.VoluntaryRequestDto;
 import com.oficina_dev.backend.dtos.Voluntary.VoluntaryResponseDto;
 import com.oficina_dev.backend.dtos.Voluntary.VoluntaryRemovedResponseDto;
+import com.oficina_dev.backend.dtos.Voluntary.VoluntaryListResponseDto;
+import com.oficina_dev.backend.dtos.Voluntary.VoluntaryRequestPatchDto;
 import com.oficina_dev.backend.services.VoluntaryService;
 import jakarta.validation.Valid;
 import org.slf4j.LoggerFactory;
@@ -23,9 +25,9 @@ public class VoluntaryController {
     private VoluntaryService voluntaryService;
 
     @GetMapping
-    public ResponseEntity<List<VoluntaryResponseDto>> getAll() {
+    public ResponseEntity<List<VoluntaryListResponseDto>> getAll() {
         logger.info("Fetching all voluntaries");
-        List<VoluntaryResponseDto> voluntaryResponseDto = this.voluntaryService.getAll();
+        List<VoluntaryListResponseDto> voluntaryResponseDto = this.voluntaryService.getAllFlattened();
         logger.info("Returning {} voluntaries", voluntaryResponseDto.size());
         return ResponseEntity.ok(voluntaryResponseDto);
     }
@@ -38,7 +40,7 @@ public class VoluntaryController {
         return ResponseEntity.ok(voluntaryResponseDto);
     }
 
-    @PostMapping("/")
+    @PostMapping
     public ResponseEntity<VoluntaryResponseDto> create(@RequestBody @Valid VoluntaryRequestDto voluntaryRequestDto) {
         logger.info("Creating new voluntary");
         VoluntaryResponseDto voluntaryResponseDto = this.voluntaryService.create(voluntaryRequestDto);
@@ -51,6 +53,17 @@ public class VoluntaryController {
         logger.info("Updating voluntary with ID: {}", id);
         VoluntaryResponseDto voluntaryResponseDto = this.voluntaryService.update(id, voluntaryRequestDto);
         logger.info("Voluntary updated successfully with ID: {}", voluntaryResponseDto.id());
+        return ResponseEntity.ok(voluntaryResponseDto);
+    }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<VoluntaryResponseDto> partialUpdate(
+            @PathVariable UUID id,
+            @RequestBody @Valid VoluntaryRequestPatchDto voluntaryRequestPatchDto
+    ) {
+        logger.info("Partially updating voluntary with ID: {}", id);
+        VoluntaryResponseDto voluntaryResponseDto = this.voluntaryService.patch(id, voluntaryRequestPatchDto);
+        logger.info("Voluntary partially updated successfully");
         return ResponseEntity.ok(voluntaryResponseDto);
     }
 
