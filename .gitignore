@@ -1,0 +1,82 @@
+# =====================
+# IDE / Editor files
+# =====================
+.idea/
+*.iml
+.vscode/
+*.swp
+*.swo
+*~
+
+# =====================
+# Environment & Secrets
+# =====================
+.env
+.env.local
+.env.*.local
+application-local.properties
+application-dev.properties
+application-prod.properties
+
+# =====================
+# Build outputs
+# =====================
+backend/target/
+frontend/.next/
+frontend/node_modules/
+frontend/build/
+backend/build/
+backend/bin/
+backend/out/
+
+# =====================
+# Logs
+# =====================
+logs/
+backend/logs/
+*.log
+hs_err_pid*.log
+
+# =====================
+# OS files
+# =====================
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# =====================
+# Java/Maven
+# =====================
+backend/.classpath
+backend/.project
+backend/.settings/
+backend/.springBeans
+backend/.sts4-cache/
+
+# =====================
+# Test artifacts (generated)
+# =====================
+backend/src/test/
+
+# =====================
+# Git & misc
+# =====================
+.gitattributes
+*.merge-conflict-files
+*.orig
+*.bak
+*.tmp
+
+# =====================
+# Backup/temp scripts and files (project-specific)
+# =====================
+update_files.bat
+update_files.js
+update_pages.sh
+FIX_LIST_PAGES.md
+MANUAL_FIX_STEPS.txt
+SETUP_AND_TEST_INSTRUCTIONS.md
+TESTING_API_CHANGES.md
+receiver-test.json
+*_fixed.js
+*_new.js
