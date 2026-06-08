@@ -1,14 +1,13 @@
 package com.oficina_dev.backend.services;
 
-import com.oficina_dev.backend.dtos.Donation.DonationRegistrationDto;
 import com.oficina_dev.backend.dtos.Donation.DonationRequestDto;
 import com.oficina_dev.backend.dtos.Donation.DonationResponseDto;
 import com.oficina_dev.backend.mappers.DonationMapper;
 import com.oficina_dev.backend.mappers.DonationItemMapper;
 import com.oficina_dev.backend.models.Donation.Donation;
+import com.oficina_dev.backend.models.Donation.DonationStatus;
 import com.oficina_dev.backend.models.DonationItem.DonationItem;
 import com.oficina_dev.backend.models.Giver.Giver;
-import com.oficina_dev.backend.models.Item.Item;
 import com.oficina_dev.backend.models.Voluntary.Voluntary;
 import com.oficina_dev.backend.repositories.DonationRepository;
 import com.oficina_dev.backend.repositories.DonationItemRepository;
@@ -78,8 +77,6 @@ public class DonationService {
                 dto.getDonationItems().forEach(donationItemDto -> {
                     DonationItem donationItem = donationItemMapper
                             .toEntity(donationItemDto, donation, itemService.findById(donationItemDto.getItemId()));
-                    donationItem.getItem().incrementQuantity(donationItem.getQuantity());
-                    itemService.save(donationItem.getItem());
                     donation.addDonationItem(donationItemRepository.saveAndFlush(donationItem));
                 });
             }
@@ -94,105 +91,36 @@ public class DonationService {
         }
     }
 
-    /**
-     * Registra uma doação recebida no sistema, adicionando as peças do estoque.
-     * 
-     * Esta função realiza o seguinte fluxo:
-     * 1. Valida os dados da doação (giver, voluntary, itens)
-     * 2. Cria um novo registro de doação no banco de dados
-     * 3. Para cada item da doação, incrementa a quantidade no estoque
-     * 4. Retorna a doação registrada com todos os seus itens
-     * 
-     * @param donationRegistrationDto DTO contendo:
-     *        - giverId: ID do doador
-     *        - voluntaryId: ID do voluntário que registra a doação
-     *        - donationItems: Lista de itens com ID do item e quantidade
-     * @return DonationResponseDto com os dados da doação registrada
-     * @throws EntityNotFoundException se giver, voluntary ou item não existirem
-     * @throws IllegalArgumentException se a quantidade for inválida
-     */
     @Transactional
-    public DonationResponseDto registerDonation(DonationRegistrationDto donationRegistrationDto) {
-        logger.info("Starting donation registration process with {} items",
-                   donationRegistrationDto.getDonationItems().size());
-
-        // Validar que os dados obrigatórios foram fornecidos
-        if (donationRegistrationDto.getGiverId() == null) {
-            throw new IllegalArgumentException("Giver ID cannot be null");
-        }
-        if (donationRegistrationDto.getVoluntaryId() == null) {
-            throw new IllegalArgumentException("Voluntary ID cannot be null");
-        }
-        if (donationRegistrationDto.getDonationItems() == null || 
-            donationRegistrationDto.getDonationItems().isEmpty()) {
-            throw new IllegalArgumentException("Donation must contain at least one item");
-        }
+    public DonationResponseDto receiveDonation(UUID donationId) {
+        logger.info("Receiving donation with ID: {}", donationId);
 
         try {
-            // Buscar o doador no banco de dados
-            logger.debug("Fetching giver with ID: {}", donationRegistrationDto.getGiverId());
-            Giver giver = giverService.findById(donationRegistrationDto.getGiverId());
-            
-            // Buscar o voluntário no banco de dados
-            logger.debug("Fetching voluntary with ID: {}", donationRegistrationDto.getVoluntaryId());
-            Voluntary voluntary = voluntaryService.findById(donationRegistrationDto.getVoluntaryId());
+            Donation donation = this.findById(donationId);
 
-            // Criar nova doação no banco de dados
-            logger.debug("Creating new donation entity");
-            Donation donation = new Donation(giver, voluntary);
-            Donation savedDonation = donationRepository.saveAndFlush(donation);
-            logger.info("Donation entity created with ID: {}", savedDonation.getId());
+            if (donation.getStatus() == DonationStatus.RECEIVED) {
+                throw new IllegalStateException("Donation is already marked as received");
+            }
 
-            // Processar cada item da doação
-            donationRegistrationDto.getDonationItems().forEach(itemDto -> {
-                logger.debug("Processing donation item - Item ID: {}, Quantity: {}", 
-                           itemDto.getItemId(), itemDto.getQuantity());
+            donation.setStatus(DonationStatus.RECEIVED);
 
-                // Buscar o item no banco de dados
-                Item item = itemService.findById(itemDto.getItemId());
-                logger.debug("Item found: {} (Current stock: {})", item.getName(), item.getQuantity());
+            if (donation.getDonationItems() != null && !donation.getDonationItems().isEmpty()) {
+                donation.getDonationItems().forEach(donationItem -> {
+                    donationItem.getItem().incrementQuantity(donationItem.getQuantity());
+                    itemService.save(donationItem.getItem());
+                });
+            }
 
-                // Validar a quantidade
-                if (itemDto.getQuantity() == null || itemDto.getQuantity() <= 0) {
-                    throw new IllegalArgumentException(
-                            "Quantity for item " + item.getName() + " must be greater than zero"
-                    );
-                }
-
-                // Criar item de doação
-                DonationItem donationItem = donationItemMapper.toEntity(itemDto, savedDonation, item);
-                logger.debug("DonationItem created with quantity: {}", donationItem.getQuantity());
-
-                // Incrementar a quantidade no estoque
-                logger.debug("Incrementing item stock by: {}", itemDto.getQuantity());
-                item.incrementQuantity(itemDto.getQuantity());
-                logger.debug("Item stock updated: {} (New stock: {})", item.getName(), item.getQuantity());
-
-                // Salvar item atualizado no banco de dados
-                itemService.save(item);
-
-                // Adicionar o item de doação à doação e salvar
-                savedDonation.addDonationItem(donationItemRepository.saveAndFlush(donationItem));
-                logger.info("Item registered in donation - Item: {}, Quantity: {}", 
-                          item.getName(), itemDto.getQuantity());
-            });
-
-            logger.info("Donation registration completed successfully - Donation ID: {}, Total items: {}", 
-                       savedDonation.getId(), savedDonation.getDonationItems().size());
-            
-            return donationMapper.toResponse(savedDonation);
-
+            Donation receivedDonation = donationRepository.saveAndFlush(donation);
+            logger.info("Donation {} received successfully and items added to stock", donationId);
+            return donationMapper.toResponse(receivedDonation);
         } catch (EntityNotFoundException e) {
-            logger.error("Required entity not found during donation registration: {}", e.getMessage());
-            throw e;
-        } catch (IllegalArgumentException e) {
-            logger.error("Invalid data during donation registration: {}", e.getMessage());
+            logger.error("Error receiving donation: {}", e.getMessage());
             throw e;
         } catch (Exception e) {
-            logger.error("Unexpected error during donation registration: {}", e.getMessage(), e);
-            throw new RuntimeException("Error registering donation: " + e.getMessage(), e);
+            logger.error("Error receiving donation: {}", e.getMessage(), e);
+            throw e;
         }
     }
 
 }
-
