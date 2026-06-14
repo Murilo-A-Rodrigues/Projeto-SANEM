@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -56,6 +57,15 @@ public class PersonService {
 
     public PersonResponseDto create(PersonRequestDto personRequestDto) {
         logger.debug("Service: Creating new person: {}", personRequestDto.getName());
+
+        // Check if a person already exists for the given address (due to @OneToOne unique constraint)
+        Optional<Person> existingPerson = this.personRepository.findByAddressId(personRequestDto.getIdAddress());
+        if (existingPerson.isPresent()) {
+            logger.info("Person already exists for address: {}. Reusing existing person with ID: {}",
+                    personRequestDto.getIdAddress(), existingPerson.get().getId());
+            return this.personMapper.toResponse(existingPerson.get());
+        }
+
         Person person = this.personMapper.toEntity(personRequestDto);
 
         try {

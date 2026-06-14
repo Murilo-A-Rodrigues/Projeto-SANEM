@@ -1,8 +1,10 @@
 package com.oficina_dev.backend.services;
 
+import com.oficina_dev.backend.dtos.Receiver.ReceiverRemovedResponseDto;
 import com.oficina_dev.backend.dtos.Receiver.ReceiverRequestDto;
 import com.oficina_dev.backend.dtos.Receiver.ReceiverRequestPatchDto;
 import com.oficina_dev.backend.dtos.Receiver.ReceiverResponseDto;
+import com.oficina_dev.backend.dtos.Receiver.ReceiverListResponseDto;
 import com.oficina_dev.backend.exceptions.EntityAlreadyExists;
 import com.oficina_dev.backend.mappers.ReceiverMapper;
 import com.oficina_dev.backend.models.Receiver.Receiver;
@@ -12,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
@@ -65,10 +68,20 @@ public class ReceiverService {
                 .toList();
     }
 
+    public List<ReceiverListResponseDto> getAllFlattened() {
+        logger.debug("Service: Fetching all receivers (flattened)");
+        List<Receiver> receivers = this.receiverRepository.findAll();
+        logger.debug("Found {} receivers in database", receivers.size());
+        return receivers.stream()
+                .map(this.receiverMapper::toListResponse)
+                .toList();
+    }
+
     public ReceiverResponseDto create(ReceiverRequestDto receiverRequestDto) {
         logger.debug("Service: Creating new receiver with NIF: {}", receiverRequestDto.getNif());
 
-        if (this.receiverRepository.existsByNif(receiverRequestDto.getNif())) {
+        // Only check for duplicate NIF if a NIF is provided (NIF is optional)
+        if (receiverRequestDto.getNif() != null && this.receiverRepository.existsByNif(receiverRequestDto.getNif())) {
             logger.error("Receiver with NIF {} already exists", receiverRequestDto.getNif());
             throw new EntityAlreadyExists("Receiver with this NIF already exists");
         }
@@ -85,7 +98,8 @@ public class ReceiverService {
         logger.debug("Service: Updating receiver with ID: {}", id);
         Receiver receiver = findById(id);
 
-        if (this.existsByNifAndIdNot(receiverRequestDto.getNif(), id)) {
+        // Only check for duplicate NIF if a NIF is provided (NIF is optional)
+        if (receiverRequestDto.getNif() != null && this.existsByNifAndIdNot(receiverRequestDto.getNif(), id)) {
             throw new EntityAlreadyExists("Another receiver with this NIF already exists");
         }
         this.receiverMapper.update(receiver, receiverRequestDto,
@@ -111,6 +125,18 @@ public class ReceiverService {
         Receiver updatedReceiver = this.receiverRepository.saveAndFlush(receiver);
         logger.debug("Receiver partially updated successfully");
         return this.receiverMapper.toResponse(updatedReceiver);
+    }
+
+    @Transactional
+    public ReceiverRemovedResponseDto delete(UUID id) {
+        logger.debug("Service: Removing receiver with ID: {}", id);
+        // Get the receiver for the response before deleting
+        Receiver receiver = this.findById(id);
+        ReceiverRemovedResponseDto response = this.receiverMapper.toRemovedResponse(receiver);
+        // Use the direct delete query to bypass JPA cascade issues with OneToMany collections
+        this.receiverRepository.deleteReceiverById(id);
+        logger.info("Receiver removed successfully with ID: {}", id);
+        return response;
     }
 
 }

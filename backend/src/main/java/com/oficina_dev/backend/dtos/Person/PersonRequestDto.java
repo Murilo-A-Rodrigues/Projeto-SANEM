@@ -2,6 +2,7 @@ package com.oficina_dev.backend.dtos.Person;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
@@ -28,6 +29,6 @@ public class PersonRequestDto {
     @Size(min = 11,max = 14)
     private String cpf;
 
-    @NotBlank
+    @NotNull
     private UUID idAddress;
 }

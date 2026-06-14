@@ -5,6 +5,7 @@ import Navigation from "../../components/navegation/navegation";
 import styles from "./lista.module.css";
 import { useRouter } from "next/navigation";
 import modalStyles from "./lista.module.css";
+import { voluntaryService } from "../../../voluntaryService";
 
 export default function ListaVoluntarios() {
   const [voluntarios, setVoluntarios] = useState([]); // [{id, nomeCompleto, email, telefoneCelular, ...}]
@@ -17,33 +18,38 @@ export default function ListaVoluntarios() {
   const [editLoading, setEditLoading] = useState(false);
 
   useEffect(() => {
+    carregarVoluntarios();
+  }, []);
+
+  const carregarVoluntarios = async () => {
     setLoading(true);
     setError("");
     try {
-      const mock = JSON.parse(localStorage.getItem('mockVoluntarios') || '[]');
-      setVoluntarios(mock);
+      const data = await voluntaryService.getAll();
+      setVoluntarios(data);
     } catch (err) {
-      setError("Erro ao carregar voluntários do mock");
+      setError(err?.message || "Erro ao carregar voluntários");
+      console.error("Erro ao carregar voluntários:", err);
     } finally {
       setLoading(false);
     }
-  }, []);
+  };
 
   const handleEdit = (id) => {
     router.push(`/cadastrovoluntario/editar/${id}`);
   };
 
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
     if (!window.confirm("Tem certeza que deseja excluir este voluntário?")) return;
     setLoading(true);
     setError("");
     try {
-      const novos = voluntarios.filter((v) => v.id !== id);
-      setVoluntarios(novos);
-      localStorage.setItem('mockVoluntarios', JSON.stringify(novos));
+      await voluntaryService.delete(id);
+      setVoluntarios(voluntarios.filter((v) => v.id !== id));
       alert("Voluntário excluído com sucesso!");
     } catch (err) {
-      setError("Erro ao excluir voluntário");
+      setError(err?.message || "Erro ao excluir voluntário");
+      console.error("Erro ao excluir voluntário:", err);
     } finally {
       setLoading(false);
     }

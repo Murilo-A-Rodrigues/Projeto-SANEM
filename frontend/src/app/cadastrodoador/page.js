@@ -1,11 +1,18 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import MenuBar from "../components/menubar/menubar";
 import Navegation from "../components/navegation/navegation";
-import { useRouter } from "next/navigation";
 import styles from "./cadastrodoador.module.css";
+import { giverService } from "../../giverService";
+import { addressService } from "../../addressService";
+import { personService } from "../../personService";
 
 const CadastroDoador = () => {
+  const searchParams = useSearchParams();
+  const editId = searchParams.get("id");
+  const isEdit = !!editId;
+
   const [form, setForm] = useState({
     nomeCompleto: "",
     telefoneCelular: "",
@@ -19,7 +26,39 @@ const CadastroDoador = () => {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [originalPerson, setOriginalPerson] = useState(null);
   const router = useRouter();
+
+  useEffect(() => {
+    if (isEdit && editId) {
+      loadGiverForEdit(editId);
+    }
+  }, [editId]);
+
+  const loadGiverForEdit = async (id) => {
+    try {
+      setLoading(true);
+      const data = await giverService.getById(id);
+      const person = data.person || {};
+      setOriginalPerson(person);
+      setForm({
+        nomeCompleto: person.name || "",
+        telefoneCelular: person.phone || "",
+        email: person.email || "",
+        cpf: person.cpf || "",
+        endereco: person.address?.street || "",
+        bairro: person.address?.neighborhood || "",
+        numero: person.address?.number?.toString() || "",
+        complemento: person.address?.complement || "",
+        pontoReferencia: person.address?.referencePoint || ""
+      });
+    } catch (err) {
+      console.error("Erro ao carregar doador:", err);
+      setError("Erro ao carregar doador: " + (err.message || "Erro desconhecido"));
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -40,23 +79,75 @@ const CadastroDoador = () => {
     }
     
     try {
-      // Simula cadastro local (mock)
-      const novoDoador = {
-        id: Date.now(),
-        nomeCompleto: form.nomeCompleto,
-        telefoneCelular: form.telefoneCelular,
-        email: form.email,
-        cpf: cpfLimpo,
-        endereco: form.endereco,
-        bairro: form.bairro,
-        numero: form.numero,
-        complemento: form.complemento,
-        pontoReferencia: form.pontoReferencia
-      };
-      // Salva no localStorage
-      const doadores = JSON.parse(localStorage.getItem('mockDoadores') || '[]');
-      doadores.push(novoDoador);
-      localStorage.setItem('mockDoadores', JSON.stringify(doadores));
+      let personId;
+      let addressId;
+
+      if (isEdit && originalPerson) {
+        // ===== MODO EDIÇÃO =====
+        addressId = originalPerson.address?.id;
+
+        const addressChanged =
+          originalPerson.address?.street !== form.endereco ||
+          originalPerson.address?.number !== parseInt(form.numero) ||
+          originalPerson.address?.neighborhood !== form.bairro;
+
+        if (addressChanged || !addressId) {
+          const novoEndereco = {
+            street: form.endereco,
+            number: parseInt(form.numero),
+            complement: form.complemento || null,
+            neighborhood: form.bairro,
+            referencePoint: form.pontoReferencia
+          };
+          const enderecoCriado = await addressService.findOrCreate(novoEndereco);
+          addressId = enderecoCriado.id;
+        }
+
+        const pessoaData = {
+          name: form.nomeCompleto,
+          phone: form.telefoneCelular,
+          email: form.email,
+          cpf: cpfLimpo,
+          idAddress: addressId
+        };
+        await personService.update(originalPerson.id, pessoaData);
+        personId = originalPerson.id;
+
+        const doadorData = {
+          personId: personId
+        };
+        await giverService.update(editId, doadorData);
+        alert("Doador atualizado com sucesso!");
+      } else {
+        // ===== MODO CRIAÇÃO =====
+        // Criar endereço
+        const novoEndereco = {
+          street: form.endereco,
+          number: parseInt(form.numero),
+          complement: form.complemento || null,
+          neighborhood: form.bairro,
+          referencePoint: form.pontoReferencia
+        };
+        const enderecoCriado = await addressService.findOrCreate(novoEndereco);
+
+        // Criar pessoa
+        const novaPessoa = {
+          name: form.nomeCompleto,
+          phone: form.telefoneCelular,
+          email: form.email,
+          cpf: cpfLimpo,
+          idAddress: enderecoCriado.id
+        };
+        const pessoaCriada = await personService.create(novaPessoa);
+
+        // Criar doador
+        const novoDoador = {
+          personId: pessoaCriada.id
+        };
+        await giverService.create(novoDoador);
+        alert("Doador cadastrado com sucesso!");
+      }
+
       setForm({
         nomeCompleto: "",
         telefoneCelular: "",
@@ -68,10 +159,10 @@ const CadastroDoador = () => {
         complemento: "",
         pontoReferencia: ""
       });
-      alert("Doador cadastrado com sucesso!");
-      router.push("/sucesso?tipo=doadores");
+      router.push("/doadores");
     } catch (err) {
-      setError(err.message || "Erro ao cadastrar");
+      console.error("Erro ao cadastrar:", err);
+      setError(`Erro ao ${isEdit ? "atualizar" : "cadastrar"} doador: ` + (err.message || "Erro desconhecido"));
     } finally {
       setLoading(false);
     }
@@ -83,7 +174,7 @@ const CadastroDoador = () => {
       <Navegation />
       <div className={styles.formWrapper}>
         <div className={styles.formContainer}>
-          <h1 className={styles.titulo}>Cadastro de Doador</h1>
+          <h1 className={styles.titulo}>{isEdit ? "Editar Doador" : "Cadastro de Doador"}</h1>
           <div className={styles.decoracao}></div>
           <form onSubmit={handleSubmit} className={styles.formulario}>
             <div className={styles.formGroup}>
@@ -124,7 +215,7 @@ const CadastroDoador = () => {
               <input id="pontoReferencia" name="pontoReferencia" value={form.pontoReferencia} onChange={handleChange} placeholder="Em frente ao parque" />
             </div>
             <button type="submit" disabled={loading}>
-              {loading ? "Cadastrando..." : "Cadastrar Doador"}
+              {loading ? (isEdit ? "Atualizando..." : "Cadastrando...") : (isEdit ? "Atualizar Doador" : "Cadastrar Doador")}
             </button>
             {error && <div className={styles.errorMessage}>{error}</div>}
           </form>
@@ -134,4 +225,4 @@ const CadastroDoador = () => {
   );
 };
 
-export default CadastroDoador; 
+export default CadastroDoador;

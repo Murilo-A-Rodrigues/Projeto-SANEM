@@ -1,13 +1,10 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
 import ReportFilters from "./ReportFilters";
 import ReportView from "./ReportView";
 import { fetchDonations, exportElementToPdf } from "./reportClient";
-import styles from "./relatorios.module.css";
 
 export default function RelatoriosPage() {
-  const router = useRouter();
   const [filters, setFilters] = useState({ from: "", to: "", donor: "", receiver: "" });
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -31,29 +28,18 @@ export default function RelatoriosPage() {
   }, [filters]);
 
   return (
-    <main className={styles.mainContainer}>
-      <div className={styles.headerContainer}>
-        <button 
-          className={styles.backButton}
-          onClick={() => router.back()}
-        >
-          ← Voltar
-        </button>
-        <h1 className={styles.title}>Relatórios de Doações</h1>
-      </div>
+    <main style={{ padding: 20 }}>
+      <h1>Relatórios de Doações</h1>
       <ReportFilters onApply={(f) => setFilters(f)} initial={filters} />
-      <div className={styles.actionButtons}>
-        <button 
-          className={styles.actionButton}
-          onClick={() => exportElementToPdf(reportRef.current, "relatorio-doacoes.pdf")}
-        >
+      <div style={{ marginTop: 12 }}>
+        <button onClick={() => exportElementToPdf(reportRef.current, "relatorio-doacoes.pdf")}>
           Exportar para PDF
         </button>
       </div>
-      {loading && <p className={styles.loadingMessage}>Carregando relatório...</p>}
-      {error && <p className={styles.errorMessage}>{error}</p>}
-      <div ref={reportRef}>
-        <ReportView data={data} />
+      {loading && <p>Carregando...</p>}
+      {error && <p style={{ color: "red" }}>{error}</p>}
+      <div style={{ marginTop: 16 }}>
+        <ReportView ref={reportRef} data={data} />
       </div>
     </main>
   );

@@ -2,6 +2,9 @@ package com.oficina_dev.backend.controllers;
 
 import com.oficina_dev.backend.dtos.Giver.GiverRequestDto;
 import com.oficina_dev.backend.dtos.Giver.GiverResponseDto;
+import com.oficina_dev.backend.dtos.Giver.GiverListResponseDto;
+import com.oficina_dev.backend.dtos.Giver.GiverRemovedResponseDto;
+import com.oficina_dev.backend.dtos.Giver.GiverRequestPatchDto;
 import com.oficina_dev.backend.services.GiverService;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
@@ -23,9 +26,9 @@ public class GiverController {
     private GiverService giverService;
 
     @GetMapping
-    public ResponseEntity<List<GiverResponseDto>> getAll() {
+    public ResponseEntity<List<GiverListResponseDto>> getAll() {
         logger.info("Fetching all givers");
-        List<GiverResponseDto> giverList = this.giverService.getAll();
+        List<GiverListResponseDto> giverList = this.giverService.getAllFlattened();
         logger.info("Returning {} givers", giverList.size());
         return ResponseEntity.ok(giverList);
     }
@@ -46,4 +49,33 @@ public class GiverController {
         return ResponseEntity.ok(giverResponseDto);
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<GiverResponseDto> update(
+            @PathVariable UUID id,
+            @RequestBody @Valid GiverRequestDto giverRequestDto
+    ) {
+        logger.info("Updating giver with ID: {}", id);
+        GiverResponseDto giverResponseDto = this.giverService.update(id, giverRequestDto);
+        logger.info("Giver updated successfully");
+        return ResponseEntity.ok(giverResponseDto);
+    }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<GiverResponseDto> partialUpdate(
+            @PathVariable UUID id,
+            @RequestBody @Valid GiverRequestPatchDto giverRequestPatchDto
+    ) {
+        logger.info("Partially updating giver with ID: {}", id);
+        GiverResponseDto giverResponseDto = this.giverService.patch(id, giverRequestPatchDto);
+        logger.info("Giver partially updated successfully");
+        return ResponseEntity.ok(giverResponseDto);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<GiverRemovedResponseDto> delete(@PathVariable UUID id) {
+        logger.info("Removing giver with ID: {}", id);
+        GiverRemovedResponseDto giverRemovedResponseDto = this.giverService.delete(id);
+        logger.info("Giver removed successfully with ID: {}", giverRemovedResponseDto.id());
+        return ResponseEntity.ok(giverRemovedResponseDto);
+    }
 }

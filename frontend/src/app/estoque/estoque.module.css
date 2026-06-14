@@ -13,24 +13,13 @@
   min-height: 80vh;
 }
 
-.headerContainer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 24px;
-  width: 100%;
-  max-width: 1100px;
-  margin-bottom: 28px;
-  padding: 0 12px;
-}
-
 .titulo {
-  font-size: 2.8rem;
+  font-size: 2.2rem;
   font-weight: 800;
+  margin-bottom: 24px;
   color: var(--color-primary);
   letter-spacing: 1px;
-  margin: 0;
-  flex: 1;
+  text-align: center;
 }
 
 .tabela {
@@ -47,7 +36,7 @@
 
 .tabela th,
 .tabela td {
-  padding: 15px 15px;
+  padding: 14px 18px;
   text-align: center;
   color: var(--color-text-light);
   font-size: 1.05rem;
@@ -84,13 +73,13 @@
 }
 
 .btn {
-  padding: 12px 18px;
+  padding: 12px 28px;
   border: none;
-  border-radius: 6px;
-  font-size: 1rem;
-  font-weight: 600;
+  border-radius: 8px;
+  font-size: 1.08rem;
+  font-weight: 700;
   cursor: pointer;
-  margin: 4px;
+  margin: 8px;
   transition: background 0.2s, color 0.2s, box-shadow 0.2s;
   box-shadow: 0 2px 8px rgba(25, 118, 210, 0.08);
 }
@@ -98,14 +87,9 @@
 .btnAdicionar {
   background: var(--color-primary);
   color: #fff;
-  white-space: nowrap;
-  flex-shrink: 0;
-  padding: 12px 24px;
 }
 .btnAdicionar:hover {
   background: var(--color-primary-dark);
-  box-shadow: 0 4px 12px rgba(25, 118, 210, 0.2);
-  transform: translateY(-2px);
 }
 
 .btnEditar {
@@ -149,7 +133,7 @@
   border-radius: 18px;
   box-shadow: 0 2px 16px rgba(25,118,210,0.10);
   min-width: 320px;
-  max-width: 500px;
+  max-width: 95vw;
   border: 1.5px solid var(--color-border-light);
 }
 
@@ -162,25 +146,20 @@
 .formLabel {
   font-weight: 600;
   color: var(--color-primary);
-  margin-bottom: 10px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+  margin-bottom: 4px;
 }
 
 .formInput {
-  padding: 14px 16px;
+  padding: 12px 14px;
   border: 1.5px solid var(--color-border-light);
   border-radius: 8px;
-  font-size: 1rem;
+  font-size: 1.05rem;
   background: #fff;
   color: #222;
   transition: border 0.2s;
-  min-height: 44px;
 }
 .formInput:focus {
   border: 1.5px solid var(--color-primary);
-  outline: none;
 }
 
 .modalBotoes {
@@ -197,66 +176,4 @@
   display: flex;
   justify-content: flex-start;
   align-items: center;
-}
-
-/* Responsiveness para tablets e celulares */
-@media (max-width: 768px) {
-  .container {
-    margin-left: 0;
-  }
-
-  .main {
-    padding-top: 32px;
-    padding-left: 12px;
-    padding-right: 12px;
-  }
-
-  .headerContainer {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 16px;
-    margin-bottom: 20px;
-  }
-
-  .titulo {
-    font-size: 1.8rem;
-    margin: 0;
-  }
-
-  .btnAdicionar {
-    width: 100%;
-    padding: 14px 20px;
-    text-align: center;
-  }
-
-  .tabela {
-    max-width: 100%;
-    font-size: 0.85rem;
-    margin: 0;
-  }
-
-  .tabela th,
-  .tabela td {
-    padding: 10px 8px;
-    font-size: 0.85rem;
-  }
-
-  .btn {
-    padding: 8px 12px;
-    font-size: 0.8rem;
-    margin: 3px;
-  }
-
-  .modal {
-    max-width: 90vw;
-    padding: 24px 16px;
-  }
-
-  .modalBotoes {
-    flex-direction: column-reverse;
-  }
-
-  .modalBotoes button {
-    width: 100%;
-  }
-}
+} 

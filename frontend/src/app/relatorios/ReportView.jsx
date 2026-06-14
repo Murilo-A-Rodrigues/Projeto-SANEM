@@ -1,7 +1,6 @@
 "use client";
 import React from "react";
 import PieChartBeneficiarios from "./PieChartBeneficiarios";
-import styles from "./relatorios.module.css";
 
 const ReportView = React.forwardRef(({ data = [] }, ref) => {
   const total = data.reduce((s, d) => s + (d.amount || 0), 0);
@@ -22,54 +21,40 @@ const ReportView = React.forwardRef(({ data = [] }, ref) => {
   const notCollectedCount = totalReceivers - collectedCount;
 
   return (
-    <div ref={ref}>
-      <div className={styles.summarySection}>
-        <h2 className={styles.summaryTitle}>Resumo Executivo</h2>
-        <p className={styles.summaryStats}>
-          Total de registros: <strong>{data.length}</strong> | Soma: <strong>R$ {total.toFixed(2)}</strong>
-        </p>
+    <div ref={ref} style={{ background: "#fff", padding: 12, borderRadius: 6 }}>
+      <h2>Resumo</h2>
+      <p>Total de registros: {data.length} — Soma: R$ {total.toFixed(2)}</p>
 
-        <div className={styles.chartContainer}>
-          <PieChartBeneficiarios 
-            collectedCount={collectedCount} 
-            notCollectedCount={notCollectedCount}
-            size={180}
-          />
-        </div>
+      <div style={{ marginBottom: 12 }}>
+        <PieChartBeneficiarios collectedCount={collectedCount} notCollectedCount={notCollectedCount} />
       </div>
 
-      <div className={styles.tableSection}>
-        <table className={styles.table}>
-          <thead>
-            <tr>
-              <th>Data</th>
-              <th>Doador</th>
-              <th>Beneficiário</th>
-              <th>Tipo</th>
-              <th>Valor</th>
-              <th>Retirado</th>
+      <table style={{ width: "100%", borderCollapse: "collapse" }}>
+        <thead>
+          <tr>
+            <th style={{ border: "1px solid #ddd", padding: 6 }}>Data</th>
+            <th style={{ border: "1px solid #ddd", padding: 6 }}>Doador</th>
+            <th style={{ border: "1px solid #ddd", padding: 6 }}>Beneficiário</th>
+            <th style={{ border: "1px solid #ddd", padding: 6 }}>Tipo</th>
+            <th style={{ border: "1px solid #ddd", padding: 6 }}>Valor</th>
+            <th style={{ border: "1px solid #ddd", padding: 6 }}>Retirado</th>
+          </tr>
+        </thead>
+        <tbody>
+          {data.map((d, i) => (
+            <tr key={i}>
+              <td style={{ border: "1px solid #eee", padding: 6 }}>{d.date || "-"}</td>
+              <td style={{ border: "1px solid #eee", padding: 6 }}>{d.donor || "-"}</td>
+              <td style={{ border: "1px solid #eee", padding: 6 }}>{d.receiver || "-"}</td>
+              <td style={{ border: "1px solid #eee", padding: 6 }}>{d.type || "-"}</td>
+              <td style={{ border: "1px solid #eee", padding: 6 }}>
+                R$ {(d.amount || 0).toFixed(2)}
+              </td>
+              <td style={{ border: "1px solid #eee", padding: 6 }}>{d.collected ? "Sim" : "Não"}</td>
             </tr>
-          </thead>
-          <tbody>
-            {data.map((d, i) => (
-              <tr key={i}>
-                <td>{d.date || "-"}</td>
-                <td>{d.donor || "-"}</td>
-                <td>{d.receiver || "-"}</td>
-                <td>{d.type || "-"}</td>
-                <td>
-                  <strong>R$ {(d.amount || 0).toFixed(2)}</strong>
-                </td>
-                <td>
-                  <span className={d.collected ? styles.collectedYes : styles.collectedNo}>
-                    {d.collected ? "Sim" : "Não"}
-                  </span>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 });

@@ -2,6 +2,9 @@ package com.oficina_dev.backend.services;
 
 import com.oficina_dev.backend.dtos.Giver.GiverRequestDto;
 import com.oficina_dev.backend.dtos.Giver.GiverResponseDto;
+import com.oficina_dev.backend.dtos.Giver.GiverListResponseDto;
+import com.oficina_dev.backend.dtos.Giver.GiverRemovedResponseDto;
+import com.oficina_dev.backend.dtos.Giver.GiverRequestPatchDto;
 import com.oficina_dev.backend.exceptions.EntityAlreadyExists;
 import com.oficina_dev.backend.mappers.GiverMapper;
 import com.oficina_dev.backend.models.Giver.Giver;
@@ -11,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
@@ -35,7 +39,7 @@ public class GiverService {
                     return new EntityNotFoundException(giverNotFoundMessage);
                 });
     }
- 
+
     public GiverResponseDto getById(UUID id) {
         logger.debug("Service: Fetching giver by ID: {}", id);
         Giver giver = findById(id);
@@ -43,12 +47,12 @@ public class GiverService {
         return this.giverMapper.toResponse(giver);
     }
 
-    public List<GiverResponseDto> getAll() {
-        logger.debug("Service: Fetching all givers");
+    public List<GiverListResponseDto> getAllFlattened() {
+        logger.debug("Service: Fetching all givers (flattened)");
         List<Giver> givers = this.giverRepository.findAll();
         logger.debug("Found {} givers in database", givers.size());
         return givers.stream()
-                .map(this.giverMapper::toResponse)
+                .map(this.giverMapper::toListResponse)
                 .toList();
     }
 
@@ -72,4 +76,34 @@ public class GiverService {
         }
     }
 
+    public GiverResponseDto update(UUID id, GiverRequestDto giverRequestDto) {
+        logger.debug("Service: Updating giver with ID: {}", id);
+        Giver giver = findById(id);
+
+        this.giverMapper.update(giver, giverRequestDto);
+        Giver updatedGiver = this.giverRepository.saveAndFlush(giver);
+        logger.debug("Giver updated successfully");
+        return this.giverMapper.toResponse(updatedGiver);
+    }
+
+    public GiverResponseDto patch(UUID id, GiverRequestPatchDto giverRequestPatchDto) {
+        logger.debug("Service: Partially updating giver with ID: {}", id);
+        Giver giver = findById(id);
+
+        this.giverMapper.patch(giver, giverRequestPatchDto);
+        logger.debug("Giver with ID {} found and will be partially updated", id);
+        Giver updatedGiver = this.giverRepository.saveAndFlush(giver);
+        logger.debug("Giver partially updated successfully");
+        return this.giverMapper.toResponse(updatedGiver);
+    }
+
+    @Transactional
+    public GiverRemovedResponseDto delete(UUID id) {
+        logger.debug("Service: Removing giver with ID: {}", id);
+        Giver giver = this.findById(id);
+        GiverRemovedResponseDto response = this.giverMapper.toRemovedResponse(giver);
+        this.giverRepository.deleteGiverById(id);
+        logger.info("Giver removed successfully with ID: {}", id);
+        return response;
+    }
 }

@@ -1,30 +1,82 @@
-# Compiled class file
-*.class
+# =====================
+# IDE / Editor files
+# =====================
+.idea/
+*.iml
+.vscode/
+*.swp
+*.swo
+*~
 
-# Log file
-*.log
+# =====================
+# Environment & Secrets
+# =====================
+.env
+.env.local
+.env.*.local
+application-local.properties
+application-dev.properties
+application-prod.properties
 
-# BlueJ files
-*.ctxt
+# =====================
+# Build outputs
+# =====================
+backend/target/
+frontend/.next/
+frontend/node_modules/
+frontend/build/
+backend/build/
+backend/bin/
+backend/out/
 
-# Mobile Tools for Java (J2ME)
-.mtj.tmp/
-
-# Package Files #
-*.jar
-*.war
-*.nar
-*.ear
-*.zip
-*.tar.gz
-*.rar
-
-# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
-hs_err_pid*
-replay_pid*
-
-
+# =====================
+# Logs
+# =====================
+logs/
 backend/logs/
 *.log
-*.log.*
-*.gz
+hs_err_pid*.log
+
+# =====================
+# OS files
+# =====================
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# =====================
+# Java/Maven
+# =====================
+backend/.classpath
+backend/.project
+backend/.settings/
+backend/.springBeans
+backend/.sts4-cache/
+
+# =====================
+# Test artifacts (generated)
+# =====================
+backend/src/test/
+
+# =====================
+# Git & misc
+# =====================
+.gitattributes
+*.merge-conflict-files
+*.orig
+*.bak
+*.tmp
+
+# =====================
+# Backup/temp scripts and files (project-specific)
+# =====================
+update_files.bat
+update_files.js
+update_pages.sh
+FIX_LIST_PAGES.md
+MANUAL_FIX_STEPS.txt
+SETUP_AND_TEST_INSTRUCTIONS.md
+TESTING_API_CHANGES.md
+receiver-test.json
+*_fixed.js
+*_new.js

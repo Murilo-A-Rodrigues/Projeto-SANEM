@@ -3,7 +3,8 @@ package com.oficina_dev.backend.services;
 import com.oficina_dev.backend.dtos.Voluntary.VoluntaryRequestDto;
 import com.oficina_dev.backend.dtos.Voluntary.VoluntaryResponseDto;
 import com.oficina_dev.backend.dtos.Voluntary.VoluntaryRemovedResponseDto;
-import com.oficina_dev.backend.exceptions.EntityAlreadyExists;
+import com.oficina_dev.backend.dtos.Voluntary.VoluntaryListResponseDto;
+import com.oficina_dev.backend.dtos.Voluntary.VoluntaryRequestPatchDto;
 import com.oficina_dev.backend.mappers.VoluntaryMapper;
 import com.oficina_dev.backend.models.Voluntary.Voluntary;
 import com.oficina_dev.backend.repositories.VoluntaryRepository;
@@ -12,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
@@ -28,6 +30,9 @@ public class VoluntaryService {
     @Autowired
     private VoluntaryMapper voluntaryMapper;
 
+    @Autowired
+    private PersonService personService;
+
     public Voluntary findById(UUID id) {
         logger.info("Searching for voluntary with ID: {}", id);
         return voluntaryRepository.findById(id)
@@ -43,6 +48,15 @@ public class VoluntaryService {
         logger.info("Found {} voluntaries", voluntaries.size());
         return voluntaries.stream()
                 .map(voluntaryMapper::toResponse)
+                .toList();
+    }
+
+    public List<VoluntaryListResponseDto> getAllFlattened() {
+        logger.info("Fetching all voluntaries (flattened)");
+        List<Voluntary> voluntaries = voluntaryRepository.findAll();
+        logger.info("Found {} voluntaries", voluntaries.size());
+        return voluntaries.stream()
+                .map(voluntaryMapper::toListResponse)
                 .toList();
     }
 
@@ -80,10 +94,10 @@ public class VoluntaryService {
         }
     }
 
-    public VoluntaryResponseDto patch(UUID id, VoluntaryRequestDto voluntaryRequestDto) {
-        logger.debug("Service: Patching voluntary with ID: {}", id);
+    public VoluntaryResponseDto patch(UUID id, VoluntaryRequestPatchDto voluntaryRequestPatchDto) {
+        logger.debug("Service: Partially updating voluntary with ID: {}", id);
         Voluntary voluntary = this.findById(id);
-        this.voluntaryMapper.patch(voluntary, voluntaryRequestDto);
+        this.voluntaryMapper.patch(voluntary, voluntaryRequestPatchDto);
         try {
             Voluntary savedVoluntary = this.voluntaryRepository.saveAndFlush(voluntary);
             logger.info("Voluntary patched successfully with ID: {}", savedVoluntary.getId());
@@ -94,18 +108,13 @@ public class VoluntaryService {
         }
     }
 
+    @Transactional
     public VoluntaryRemovedResponseDto delete(UUID id) {
         logger.debug("Service: Removing voluntary with ID: {}", id);
         Voluntary voluntary = this.findById(id);
-        voluntary.setActive(false);
-        try {
-            this.voluntaryRepository.saveAndFlush(voluntary);
-        } catch (Exception e) {
-            logger.error("Error removing voluntary with ID {}: {}", id, e.getMessage(), e);
-            throw e;
-        }
-        logger.info("Voluntary removed successfully with ID: {}", voluntary.getId());
-        return this.voluntaryMapper.toRemovedResponse(voluntary);
-
+        VoluntaryRemovedResponseDto response = this.voluntaryMapper.toRemovedResponse(voluntary);
+        this.voluntaryRepository.deleteVoluntaryById(id);
+        logger.info("Voluntary removed successfully with ID: {}", id);
+        return response;
     }
 }

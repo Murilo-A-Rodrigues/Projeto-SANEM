@@ -24,7 +24,7 @@ public class Receiver {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(name = "nif", length = 100, nullable = false, unique = true)
+    @Column(name = "nif", length = 100, nullable = true, unique = false)
     private String nif;
 
     @Column(name = "is_fit", nullable = false)
@@ -64,9 +64,7 @@ public class Receiver {
 
     public void setNif(String nif) {
         //TODO: IMPLEMENT NIF VALIDATION HERE
-        if (nif == null || nif.isEmpty()) {
-            throw new IllegalArgumentException("NIF cannot be null or empty");
-        }
+        // NIF é opcional - pode ser null se CPF estiver preenchido
         this.nif = nif;
     }
 

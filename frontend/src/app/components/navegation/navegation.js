@@ -30,9 +30,9 @@ export default function Navigation() {
                 <Link href="/dashboard" className={styles.menuItem}>{menuIcons.Dashboard} Dashboard</Link>
                 <Link href="/cadastrooption" className={styles.menuItem}>{menuIcons.Cadastro} Cadastro</Link>
                 <Link href="/estoque" className={styles.menuItem}>{menuIcons.Estoque} Estoque</Link>
-                <Link href="/cadastrodoador/lista" className={styles.menuItem}>{menuIcons.Doadores} Doadores</Link>
-                <Link href="/cadastrobeneficiario/lista" className={styles.menuItem}>{menuIcons.Beneficiários} Beneficiários</Link>
-                <Link href="/cadastrovoluntario/lista" className={styles.menuItem}>{menuIcons.Voluntários} Voluntários</Link>
+                <Link href="/doadores" className={styles.menuItem}>{menuIcons.Doadores} Doadores</Link>
+                <Link href="/beneficiarios" className={styles.menuItem}>{menuIcons.Beneficiários} Beneficiários</Link>
+                <Link href="/voluntarios" className={styles.menuItem}>{menuIcons.Voluntários} Voluntários</Link>
             </nav>
             <div className={styles.sectionTitle}>OTHERS</div>
             <nav className={styles.menuSection}>

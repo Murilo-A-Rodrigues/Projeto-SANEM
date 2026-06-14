@@ -5,6 +5,7 @@ import Navigation from "../../components/navegation/navegation";
 import styles from "./lista.module.css";
 import { useRouter } from "next/navigation";
 import modalStyles from "./lista.module.css";
+import { giverService } from "../../../giverService";
 
 export default function ListaDoadores() {
   const [doadores, setDoadores] = useState([]); // [{id, nomeCompleto, email, telefoneCelular, ...}]
@@ -17,33 +18,38 @@ export default function ListaDoadores() {
   const [editLoading, setEditLoading] = useState(false);
 
   useEffect(() => {
+    carregarDoadores();
+  }, []);
+
+  const carregarDoadores = async () => {
     setLoading(true);
     setError("");
     try {
-      const mock = JSON.parse(localStorage.getItem('mockDoadores') || '[]');
-      setDoadores(mock);
+      const data = await giverService.getAll();
+      setDoadores(data);
     } catch (err) {
-      setError("Erro ao carregar doadores do mock");
+      setError(err?.message || "Erro ao carregar doadores");
+      console.error("Erro ao carregar doadores:", err);
     } finally {
       setLoading(false);
     }
-  }, []);
+  };
 
   const handleEdit = (id) => {
     router.push(`/cadastrodoador/editar/${id}`);
   };
 
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
     if (!window.confirm("Tem certeza que deseja excluir este doador?")) return;
     setLoading(true);
     setError("");
     try {
-      const novos = doadores.filter((d) => d.id !== id);
-      setDoadores(novos);
-      localStorage.setItem('mockDoadores', JSON.stringify(novos));
+      await giverService.delete(id);
+      setDoadores(doadores.filter((d) => d.id !== id));
       alert("Doador excluído com sucesso!");
     } catch (err) {
-      setError("Erro ao excluir doador");
+      setError(err?.message || "Erro ao excluir doador");
+      console.error("Erro ao excluir doador:", err);
     } finally {
       setLoading(false);
     }

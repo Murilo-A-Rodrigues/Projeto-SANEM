@@ -22,9 +22,9 @@ public class ReceiverController {
     private ReceiverService receiverService;
 
     @GetMapping
-    public ResponseEntity<List<ReceiverResponseDto>> getAll() {
+    public ResponseEntity<List<ReceiverListResponseDto>> getAll() {
         logger.info("Fetching all receivers");
-        List<ReceiverResponseDto> receiverList = this.receiverService.getAll();
+        List<ReceiverListResponseDto> receiverList = this.receiverService.getAllFlattened();
         logger.info("Returning {} receivers", receiverList.size());
         return ResponseEntity.ok(receiverList);
     }
@@ -65,6 +65,14 @@ public class ReceiverController {
         ReceiverResponseDto receiverResponseDto = this.receiverService.patch(id, receiverRequestPatchDto);
         logger.info("Receiver partially updated successfully");
         return ResponseEntity.ok(receiverResponseDto);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ReceiverRemovedResponseDto> delete(@PathVariable UUID id) {
+        logger.info("Removing receiver with ID: {}", id);
+        ReceiverRemovedResponseDto receiverRemovedResponseDto = this.receiverService.delete(id);
+        logger.info("Receiver removed successfully with ID: {}", receiverRemovedResponseDto.id());
+        return ResponseEntity.ok(receiverRemovedResponseDto);
     }
 
 }

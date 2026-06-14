@@ -33,6 +33,7 @@ public class Giver {
     @Column(name = "updated_at")
     private ZonedDateTime updatedAt;
 
+    @Setter
     @OneToOne
     @JoinColumn(name = "id_person", referencedColumnName = "id")
     private Person person;
