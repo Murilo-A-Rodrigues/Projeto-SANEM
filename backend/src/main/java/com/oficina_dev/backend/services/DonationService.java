@@ -5,7 +5,10 @@ import com.oficina_dev.backend.dtos.Donation.DonationResponseDto;
 import com.oficina_dev.backend.mappers.DonationMapper;
 import com.oficina_dev.backend.mappers.DonationItemMapper;
 import com.oficina_dev.backend.models.Donation.Donation;
+<<<<<<< HEAD
+=======
 import com.oficina_dev.backend.models.Donation.DonationStatus;
+>>>>>>> branch_vitor
 import com.oficina_dev.backend.models.DonationItem.DonationItem;
 import com.oficina_dev.backend.models.Giver.Giver;
 import com.oficina_dev.backend.models.Voluntary.Voluntary;
@@ -77,6 +80,11 @@ public class DonationService {
                 dto.getDonationItems().forEach(donationItemDto -> {
                     DonationItem donationItem = donationItemMapper
                             .toEntity(donationItemDto, donation, itemService.findById(donationItemDto.getItemId()));
+<<<<<<< HEAD
+                    donationItem.getItem().incrementQuantity(donationItem.getQuantity());
+                    itemService.save(donationItem.getItem());
+=======
+>>>>>>> branch_vitor
                     donation.addDonationItem(donationItemRepository.saveAndFlush(donationItem));
                 });
             }
@@ -91,6 +99,8 @@ public class DonationService {
         }
     }
 
+<<<<<<< HEAD
+=======
     @Transactional
     public DonationResponseDto receiveDonation(UUID donationId) {
         logger.info("Receiving donation with ID: {}", donationId);
@@ -123,4 +133,5 @@ public class DonationService {
         }
     }
 
+>>>>>>> branch_vitor
 }
