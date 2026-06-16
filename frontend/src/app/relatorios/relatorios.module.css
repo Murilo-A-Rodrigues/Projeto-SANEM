@@ -82,23 +82,31 @@
 }
 
 .filterButton {
-  padding: 10px 20px;
-  background: linear-gradient(135deg, #0066cc 0%, #0052a3 100%);
+  padding: 12px 28px;
+  background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%);
   color: white;
   border: none;
   border-radius: 6px;
   font-size: 0.95rem;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
   transition: all 0.3s;
   align-self: flex-end;
-  min-width: 120px;
+  min-width: 140px;
+  box-shadow: 0 2px 8px rgba(25, 118, 210, 0.3);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .filterButton:hover {
-  background: linear-gradient(135deg, #0052a3 0%, #003d7a 100%);
+  background: linear-gradient(135deg, #1565c0 0%, #0d47a1 100%);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 102, 204, 0.3);
+  box-shadow: 0 6px 16px rgba(25, 118, 210, 0.4);
+}
+
+.filterButton:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(25, 118, 210, 0.3);
 }
 
 .actionButtons {

@@ -1,16 +1,16 @@
 "use client";
 import React from "react";
 
-export default function PieChartBeneficiarios({ collectedCount = 0, notCollectedCount = 0, size = 140 }) {
+export default function PieChartBeneficiarios({ collectedCount = 0, notCollectedCount = 0, size = 180 }) {
   const total = collectedCount + notCollectedCount;
   const percent = total === 0 ? 0 : Math.round((collectedCount / total) * 100);
-  const radius = 40;
-  const stroke = 18;
+  const radius = 50;
+  const stroke = 22;
   const circumference = 2 * Math.PI * radius;
   const collectedStroke = total === 0 ? 0 : (collectedCount / total) * circumference;
 
   return (
-    <div style={{ display: "flex", gap: 16, alignItems: "center" }}>
+    <div style={{ display: "flex", gap: 24, alignItems: "center" }}>
       <svg width={size} height={size} viewBox="0 0 120 120" role="img" aria-label="Gráfico de beneficiários">
         <g transform="translate(60,60)">
           {/* fundo */}
@@ -27,25 +27,52 @@ export default function PieChartBeneficiarios({ collectedCount = 0, notCollected
             style={{ transition: "stroke-dasharray 400ms ease" }}
           />
           {/* centro do texto */}
-          <text x="0" y="-4" textAnchor="middle" fontSize="14" fontWeight="600" fill="#333">
+          <text x="0" y="-4" textAnchor="middle" fontSize="18" fontWeight="700" fill="#333">
             {percent}%
           </text>
-          <text x="0" y="12" textAnchor="middle" fontSize="10" fill="#666">
+          <text x="0" y="14" textAnchor="middle" fontSize="11" fill="#666" fontWeight="500">
             retiraram
           </text>
         </g>
       </svg>
 
-      <div style={{ fontSize: 14 }}>
-        <div style={{ marginBottom: 6 }}>
-          <span style={{ display: "inline-block", width: 12, height: 12, background: "#4caf50", marginRight: 8 }}></span>
-          Retiraram: <strong>{collectedCount}</strong>
+      <div style={{ fontSize: "0.95rem" }}>
+        <div style={{ marginBottom: 12, display: "flex", alignItems: "center", gap: 12 }}>
+          <span style={{ 
+            display: "inline-block", 
+            width: 16, 
+            height: 16, 
+            background: "#4caf50", 
+            borderRadius: 3 
+          }}></span>
+          <div>
+            <div style={{ fontSize: "0.85rem", color: "#666" }}>Retiraram</div>
+            <div style={{ fontSize: "1.2rem", fontWeight: "700", color: "#4caf50" }}>{collectedCount}</div>
+          </div>
         </div>
-        <div>
-          <span style={{ display: "inline-block", width: 12, height: 12, background: "#ddd", marginRight: 8 }}></span>
-          Não retiraram: <strong>{notCollectedCount}</strong>
+        <div style={{ marginBottom: 12, display: "flex", alignItems: "center", gap: 12 }}>
+          <span style={{ 
+            display: "inline-block", 
+            width: 16, 
+            height: 16, 
+            background: "#ddd", 
+            borderRadius: 3 
+          }}></span>
+          <div>
+            <div style={{ fontSize: "0.85rem", color: "#666" }}>Não retiraram</div>
+            <div style={{ fontSize: "1.2rem", fontWeight: "700", color: "#999" }}>{notCollectedCount}</div>
+          </div>
         </div>
-        <div style={{ marginTop: 8, color: "#666", fontSize: 12 }}>Total beneficiários: {total}</div>
+        <div style={{ 
+          marginTop: 16, 
+          paddingTop: 12, 
+          borderTop: "1px solid #eee", 
+          color: "#666", 
+          fontSize: "0.9rem",
+          fontWeight: "600"
+        }}>
+          Total: <strong>{total}</strong> beneficiários
+        </div>
       </div>
     </div>
   );
