@@ -1,18 +1,16 @@
 "use client";
 import MenuBar from "../components/menubar/menubar";
 import Navigation from "../components/navegation/navegation";
-import { mockEstoque as mockEstoqueOrig } from "../../mocks/mockEstoque";
 import styles from "./estoque.module.css";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-
-const STORAGE_KEY = "mockEstoque";
+import { itemService } from "@/itemService";
 
 export default function EstoquePage() {
+<<<<<<< Updated upstream
   const [mockEstoque, setMockEstoque] = useState([]);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [showEditModal, setShowEditModal] = useState(false);
   const [itemToDelete, setItemToDelete] = useState(null);
   const [novoProduto, setNovoProduto] = useState({
     nome: "",
@@ -20,43 +18,43 @@ export default function EstoquePage() {
     tamanho: "",
     quantidade: "",
   });
+  const [editId, setEditId] = useState(null);
   const [editProduto, setEditProduto] = useState({
-    id: null,
     nome: "",
     categoria: "",
     tamanho: "",
     quantidade: "",
   });
+=======
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+>>>>>>> Stashed changes
   const router = useRouter();
   const hasNotification = false;
 
-  // 🔹 Carrega do localStorage ou, se não tiver, inicializa com o mock do arquivo
   useEffect(() => {
-    if (typeof window === "undefined") return;
-
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        if (Array.isArray(parsed)) {
-          setMockEstoque(parsed);
-          return;
-        }
-      }
-    } catch (e) {
-      console.error("Erro lendo estoque do localStorage:", e);
-    }
-
-    // fallback: mock original
-    setMockEstoque(mockEstoqueOrig);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(mockEstoqueOrig));
+    carregarEstoque();
   }, []);
 
-  function salvarNoStorage(updated) {
-    if (typeof window === "undefined") return;
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+  const carregarEstoque = async () => {
+    setLoading(true);
+    try {
+      const data = await itemService.getAll();
+      setItems(Array.isArray(data) ? data : []);
+    } catch (e) {
+      console.error("Erro ao carregar estoque:", e);
+      setItems([]);
+    }
+    setLoading(false);
+  };
+
+
+  function toCategoryName(category) {
+    if (!category || typeof category !== "object") return "-";
+    return category.name || category.toString() || "-";
   }
 
+<<<<<<< Updated upstream
   function handleAddProduto(e) {
     e.preventDefault();
     const novo = {
@@ -84,15 +82,14 @@ export default function EstoquePage() {
     setShowDeleteModal(true);
   }
 
-  function openEditModal(item) {
+  function startEditProduto(item) {
+    setEditId(item.id);
     setEditProduto({
-      id: item.id,
       nome: item.nome,
       categoria: item.categoria,
       tamanho: item.tamanho,
       quantidade: item.quantidade,
     });
-    setShowEditModal(true);
   }
 
   function handleEditChange(e) {
@@ -103,24 +100,14 @@ export default function EstoquePage() {
     }));
   }
 
-  function saveEditProduto(e) {
-    e.preventDefault();
+  function saveEditProduto(id) {
     const updated = mockEstoque.map((item) =>
-      item.id === editProduto.id
-        ? {
-            ...item,
-            nome: editProduto.nome,
-            categoria: editProduto.categoria,
-            tamanho: editProduto.tamanho,
-            quantidade: editProduto.quantidade,
-          }
-        : item
+      item.id === id ? { ...item, ...editProduto } : item
     );
     setMockEstoque(updated);
     salvarNoStorage(updated);
-    setShowEditModal(false);
+    setEditId(null);
     setEditProduto({
-      id: null,
       nome: "",
       categoria: "",
       tamanho: "",
@@ -129,9 +116,8 @@ export default function EstoquePage() {
   }
 
   function cancelEditProduto() {
-    setShowEditModal(false);
+    setEditId(null);
     setEditProduto({
-      id: null,
       nome: "",
       categoria: "",
       tamanho: "",
@@ -142,6 +128,11 @@ export default function EstoquePage() {
   // (essa função do router vc nem está usando, mas deixei se quiser telas futuras)
   function handleEditProduto(item) {
     router.push(`/estoque/editar/${item.id}`);
+=======
+  function toSizeName(size) {
+    if (!size || typeof size !== "object") return "-";
+    return size.name || size.description || size.toString() || "-";
+>>>>>>> Stashed changes
   }
 
   return (
@@ -150,8 +141,16 @@ export default function EstoquePage() {
       <div className={styles.container}>
         <MenuBar hasNotification={hasNotification} />
         <main className={styles.main}>
-          <div className={styles.headerContainer}>
-            <h1 className={styles.titulo}>Controle de Estoque</h1>
+<<<<<<< Updated upstream
+          <h1 className={styles.titulo}>Controle de Estoque</h1>
+          <div
+            style={{
+              width: "100%",
+              display: "flex",
+              justifyContent: "flex-end",
+              marginBottom: 24,
+            }}
+          >
             <button
               className={`${styles.btn} ${styles.btnAdicionar}`}
               onClick={() => setShowAddModal(true)}
@@ -174,114 +173,127 @@ export default function EstoquePage() {
               {mockEstoque.map((item) => (
                 <tr key={item.id}>
                   <td>{item.id}</td>
-                  <td>{item.nome}</td>
-                  <td>{item.categoria}</td>
-                  <td>{item.tamanho}</td>
-                  <td>{item.quantidade}</td>
-                  <td>
-                    <button
-                      className={`${styles.btn} ${styles.btnEditar}`}
-                      onClick={() => openEditModal(item)}
-                    >
-                      Editar
-                    </button>
-                    <button
-                      className={`${styles.btn} ${styles.btnExcluir}`}
-                      onClick={() => openDeleteModal(item)}
-                    >
-                      Excluir
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-
-          {/* Modal Adicionar */}
-          {showAddModal && (
-            <div className={styles.modalOverlay}>
-              <div className={styles.modal}>
-                <h2
-                  className={styles.titulo}
-                  style={{ fontSize: "1.3rem", marginBottom: 16 }}
-                >
-                  Adicionar Produto
-                </h2>
-                <form className={styles.formulario} onSubmit={handleAddProduto}>
-                  <label className={styles.formLabel}>
-                    Nome
-                    <input
-                      className={styles.formInput}
-                      required
-                      value={novoProduto.nome}
-                      onChange={(e) =>
-                        setNovoProduto({ ...novoProduto, nome: e.target.value })
-                      }
-                    />
-                  </label>
-                  <label className={styles.formLabel}>
-                    Categoria
-                    <input
-                      className={styles.formInput}
-                      required
-                      value={novoProduto.categoria}
-                      onChange={(e) =>
-                        setNovoProduto({
-                          ...novoProduto,
-                          categoria: e.target.value,
-                        })
-                      }
-                    />
-                  </label>
-                  <label className={styles.formLabel}>
-                    Tamanho
-                    <input
-                      className={styles.formInput}
-                      required
-                      value={novoProduto.tamanho}
-                      onChange={(e) =>
-                        setNovoProduto({
-                          ...novoProduto,
-                          tamanho: e.target.value,
-                        })
-                      }
-                    />
-                  </label>
-                  <label className={styles.formLabel}>
-                    Quantidade
-                    <input
-                      className={styles.formInput}
-                      required
-                      type="number"
-                      min={1}
-                      value={novoProduto.quantidade}
-                      onChange={(e) =>
-                        setNovoProduto({
-                          ...novoProduto,
-                          quantidade: e.target.value,
-                        })
-                      }
-                    />
-                  </label>
-                  <div className={styles.modalBotoes}>
-                    <button
-                      type="button"
-                      className={`${styles.btn} ${styles.btnExcluir}`}
-                      onClick={() => setShowAddModal(false)}
-                    >
-                      Cancelar
-                    </button>
-                    <button
-                      type="submit"
-                      className={`${styles.btn} ${styles.btnAdicionar}`}
-                    >
-                      Adicionar
-                    </button>
-                  </div>
-                </form>
-              </div>
+                  {editId === item.id ? (
+                    <>
+                      <td>
+                        <input
+                          className={styles.formInput}
+                          name="nome"
+                          value={editProduto.nome}
+                          onChange={handleEditChange}
+                        />
+                      </td>
+                      <td>
+                        <input
+                          className={styles.formInput}
+                          name="categoria"
+                          value={editProduto.categoria}
+                          onChange={handleEditChange}
+                        />
+                      </td>
+                      <td>
+                        <input
+                          className={styles.formInput}
+                          name="tamanho"
+                          value={editProduto.tamanho}
+                          onChange={handleEditChange}
+                        />
+                      </td>
+                      <td>
+                        <input
+                          className={styles.formInput}
+                          name="quantidade"
+                          type="number"
+                          min={1}
+                          value={editProduto.quantidade}
+                          onChange={handleEditChange}
+                        />
+                      </td>
+                      <td>
+                        <button
+                          className={`${styles.btn} ${styles.btnAdicionar}`}
+                          onClick={() => saveEditProduto(item.id)}
+                        >
+                          Salvar
+                        </button>
+                        <button
+                          className={`${styles.btn} ${styles.btnExcluir}`}
+                          onClick={cancelEditProduto}
+                        >
+                          Cancelar
+                        </button>
+                      </td>
+                    </>
+                  ) : (
+                    <>
+                      <td>{item.nome}</td>
+                      <td>{item.categoria}</td>
+                      <td>{item.tamanho}</td>
+                      <td>{item.quantidade}</td>
+                      <td>
+                        <button
+                          className={`${styles.btn} ${styles.btnEditar}`}
+                          onClick={() => startEditProduto(item)}
+                        >
+                          Editar
+                        </button>
+                        <button
+                          className={`${styles.btn} ${styles.btnExcluir}`}
+                          onClick={() => openDeleteModal(item)}
+                        >
+                          Excluir
+                        </button>
+                      </td>
+                    </>
+                  )}
+=======
+          <div className={styles.headerContainer}>
+            <h1 className={styles.titulo}>Controle de Estoque</h1>
+            <div className={styles.headerButtons}>
+              <button
+                className={`${styles.btn} ${styles.btnDoacao}`}
+                onClick={() => router.push("/cadastrodoacao")}
+              >
+                + Registrar Doação
+              </button>
+              <button
+                className={`${styles.btn} ${styles.btnRepasse}`}
+                onClick={() => router.push("/cadastrorepasse")}
+              >
+                + Registrar Repasse
+              </button>
             </div>
+          </div>
+          {loading ? (
+            <p style={{ color: "#6b7280", marginTop: 40 }}>Carregando estoque...</p>
+          ) : (
+            <table className={styles.tabela}>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Tipo</th>
+                  <th>Categoria</th>
+                  <th>Tamanho</th>
+                  <th>Quantidade</th>
+                  <th>Doador</th>
+>>>>>>> Stashed changes
+                </tr>
+              </thead>
+              <tbody>
+                {items.map((item) => (
+                  <tr key={item.id}>
+                    <td>{item.id}</td>
+                    <td>{item.name}</td>
+                    <td>{toCategoryName(item.category)}</td>
+                    <td>{toSizeName(item.size)}</td>
+                    <td>{item.quantity}</td>
+                    <td>{item.sex === 'm' ? 'Masculino' : 'Feminino'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           )}
+<<<<<<< Updated upstream
 
           {/* Modal Excluir */}
           {showDeleteModal && (
@@ -313,79 +325,12 @@ export default function EstoquePage() {
                 </div>
               </div>
             </div>
-          )}
-
-          {/* Modal Editar */}
-          {showEditModal && (
-            <div className={styles.modalOverlay}>
-              <div className={styles.modal}>
-                <h2
-                  className={styles.titulo}
-                  style={{ fontSize: "1.3rem", marginBottom: 16 }}
-                >
-                  Editar Produto
-                </h2>
-                <form className={styles.formulario} onSubmit={saveEditProduto}>
-                  <label className={styles.formLabel}>
-                    Nome
-                    <input
-                      className={styles.formInput}
-                      required
-                      name="nome"
-                      value={editProduto.nome}
-                      onChange={handleEditChange}
-                    />
-                  </label>
-                  <label className={styles.formLabel}>
-                    Categoria
-                    <input
-                      className={styles.formInput}
-                      required
-                      name="categoria"
-                      value={editProduto.categoria}
-                      onChange={handleEditChange}
-                    />
-                  </label>
-                  <label className={styles.formLabel}>
-                    Tamanho
-                    <input
-                      className={styles.formInput}
-                      required
-                      name="tamanho"
-                      value={editProduto.tamanho}
-                      onChange={handleEditChange}
-                    />
-                  </label>
-                  <label className={styles.formLabel}>
-                    Quantidade
-                    <input
-                      className={styles.formInput}
-                      required
-                      type="number"
-                      min={1}
-                      name="quantidade"
-                      value={editProduto.quantidade}
-                      onChange={handleEditChange}
-                    />
-                  </label>
-                  <div className={styles.modalBotoes}>
-                    <button
-                      type="button"
-                      className={`${styles.btn} ${styles.btnExcluir}`}
-                      onClick={cancelEditProduto}
-                    >
-                      Cancelar
-                    </button>
-                    <button
-                      type="submit"
-                      className={`${styles.btn} ${styles.btnAdicionar}`}
-                    >
-                      Salvar
-                    </button>
-                  </div>
-                </form>
-              </div>
-            </div>
+=======
+          {!loading && items.length === 0 && (
+            <p style={{ color: "#6b7280", marginTop: 20 }}>
+              Nenhum item no estoque.
+            </p>
+>>>>>>> Stashed changes
           )}
         </main>
       </div>

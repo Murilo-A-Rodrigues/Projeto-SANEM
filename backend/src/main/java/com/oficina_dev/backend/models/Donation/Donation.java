@@ -43,6 +43,11 @@ public class Donation {
     @JoinColumn(name = "id_voluntary")
     private Voluntary voluntary;
 
+    @Setter
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status")
+    private DonationStatus status = DonationStatus.PENDING;
+
     @OneToMany(mappedBy = "donation")
     private List<DonationItem> donationItems;
 
@@ -50,6 +55,7 @@ public class Donation {
         this.giver = giver;
         this.voluntary = voluntary;
         this.donationItems = new ArrayList<DonationItem>();
+        this.status = DonationStatus.PENDING;
     }
 
     public void addDonationItem(DonationItem donationItem) {

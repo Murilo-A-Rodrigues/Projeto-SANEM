@@ -1,7 +1,7 @@
 .container {
   min-height: 100vh;
   background: var(--color-bg);
-  margin-left: 220px;
+  margin-left: 220px; /* largura do Navigation */
 }
 
 .main {
@@ -13,6 +13,8 @@
   min-height: 80vh;
 }
 
+<<<<<<< Updated upstream
+=======
 .headerContainer {
   display: flex;
   align-items: center;
@@ -24,13 +26,46 @@
   padding: 0 12px;
 }
 
+.headerButtons {
+  display: flex;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.btnDoacao {
+  background: #10b981;
+  color: #fff;
+  white-space: nowrap;
+  flex-shrink: 0;
+  padding: 12px 24px;
+}
+.btnDoacao:hover {
+  background: #059669;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  transform: translateY(-2px);
+}
+
+.btnRepasse {
+  background: #3b82f6;
+  color: #fff;
+  white-space: nowrap;
+  flex-shrink: 0;
+  padding: 12px 24px;
+}
+.btnRepasse:hover {
+  background: #2563eb;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  transform: translateY(-2px);
+}
+
+>>>>>>> Stashed changes
 .titulo {
-  font-size: 2.8rem;
+  font-size: 2.2rem;
   font-weight: 800;
-  color: #1976D2;
+  margin-bottom: 24px;
+  color: var(--color-primary);
   letter-spacing: 1px;
-  margin: 0;
-  flex: 1;
+  text-align: center;
 }
 
 .tabela {
@@ -39,22 +74,22 @@
   margin: 12px auto 0 auto;
   border-collapse: separate;
   border-spacing: 0 10px;
-  background: #F8F8F8;
+  background: var(--color-bg-alt);
   border-radius: 16px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 2px 12px rgba(25, 118, 210, 0.07);
   overflow: hidden;
 }
 
 .tabela th,
 .tabela td {
-  padding: 15px 15px;
+  padding: 14px 18px;
   text-align: center;
-  color: #444444;
+  color: var(--color-text-light);
   font-size: 1.05rem;
 }
 
 .tabela th {
-  background: #1976D2;
+  background: var(--color-primary);
   color: #fff;
   font-weight: 700;
   text-transform: uppercase;
@@ -64,66 +99,61 @@
 }
 
 .tabela tbody tr {
-  background: #ffffff;
+  background: var(--color-bg-alt);
   transition: background 0.2s;
   border-radius: 12px;
 }
 .tabela tbody tr:nth-child(even) {
-  background: #F8F8F8;
+  background: #f5f6fa;
 }
 .tabela tbody tr:hover {
-  background: #F0F0F0;
+  background: #e9eafd;
 }
 
 .tabela td {
   border-top: none;
-  border-bottom: 1.5px solid #E8E8E8;
+  border-bottom: 1.5px solid var(--color-border-light);
 }
 .tabela tr:last-child td {
   border-bottom: none;
 }
 
 .btn {
-  padding: 12px 18px;
+  padding: 12px 28px;
   border: none;
-  border-radius: 6px;
-  font-size: 1rem;
-  font-weight: 600;
+  border-radius: 8px;
+  font-size: 1.08rem;
+  font-weight: 700;
   cursor: pointer;
-  margin: 4px;
+  margin: 8px;
   transition: background 0.2s, color 0.2s, box-shadow 0.2s;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
+  box-shadow: 0 2px 8px rgba(25, 118, 210, 0.08);
 }
 
 .btnAdicionar {
-  background: #1976D2;
+  background: var(--color-primary);
   color: #fff;
-  white-space: nowrap;
-  flex-shrink: 0;
-  padding: 12px 24px;
 }
 .btnAdicionar:hover {
-  background: #1565C0;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
-  transform: translateY(-2px);
+  background: var(--color-primary-dark);
 }
 
 .btnEditar {
-  background: #ffffff;
-  color: #1976D2;
-  border: 1.5px solid #1976D2;
+  background: #e9eafd;
+  color: var(--color-primary);
+  border: 1.5px solid var(--color-primary);
 }
 .btnEditar:hover {
-  background: #F0F0F0;
+  background: #d0d8f6;
 }
 
 .btnExcluir {
-  background: #fff5f5;
-  color: #C0392B;
-  border: 1.5px solid #C0392B;
+  background: #fff0f0;
+  color: var(--color-error);
+  border: 1.5px solid var(--color-error);
 }
 .btnExcluir:hover {
-  background: #FDECEB;
+  background: #ffd6d6;
 }
 
 .botoesInferiores {
@@ -144,44 +174,38 @@
 }
 
 .modal {
-  background: #ffffff;
+  background: var(--color-bg-alt);
   padding: 32px 24px;
   border-radius: 18px;
-  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.10);
+  box-shadow: 0 2px 16px rgba(25,118,210,0.10);
   min-width: 320px;
-  max-width: 500px;
-  border: 1.5px solid #E8E8E8;
+  max-width: 95vw;
+  border: 1.5px solid var(--color-border-light);
 }
 
 .formulario {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 16px;
 }
 
 .formLabel {
   font-weight: 600;
-  color: #1976D2;
-  margin-bottom: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+  color: var(--color-primary);
+  margin-bottom: 4px;
 }
 
 .formInput {
-  padding: 14px 16px;
-  border: 1.5px solid #E8E8E8;
+  padding: 12px 14px;
+  border: 1.5px solid var(--color-border-light);
   border-radius: 8px;
-  font-size: 1rem;
+  font-size: 1.05rem;
   background: #fff;
   color: #222;
   transition: border 0.2s;
-  min-height: 44px;
-  font-weight: 400;
 }
 .formInput:focus {
-  border: 1.5px solid #1976D2;
-  outline: none;
+  border: 1.5px solid var(--color-primary);
 }
 
 .modalBotoes {
@@ -198,65 +222,4 @@
   display: flex;
   justify-content: flex-start;
   align-items: center;
-}
-
-@media (max-width: 768px) {
-  .container {
-    margin-left: 0;
-  }
-
-  .main {
-    padding-top: 32px;
-    padding-left: 12px;
-    padding-right: 12px;
-  }
-
-  .headerContainer {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 16px;
-    margin-bottom: 20px;
-  }
-
-  .titulo {
-    font-size: 1.8rem;
-    margin: 0;
-  }
-
-  .btnAdicionar {
-    width: 100%;
-    padding: 14px 20px;
-    text-align: center;
-  }
-
-  .tabela {
-    max-width: 100%;
-    font-size: 0.85rem;
-    margin: 0;
-  }
-
-  .tabela th,
-  .tabela td {
-    padding: 10px 8px;
-    font-size: 0.85rem;
-  }
-
-  .btn {
-    padding: 8px 12px;
-    font-size: 0.8rem;
-    margin: 3px;
-  }
-
-  .modal {
-    max-width: 90vw;
-    padding: 24px 16px;
-  }
-
-  .modalBotoes {
-    flex-direction: column-reverse;
-  }
-
-  .modalBotoes button {
-    width: 100%;
-  }
-}
+} 
