@@ -115,11 +115,9 @@ public class TransferService {
                     itemService.save(item);
 
                     // Criar e salvar o item de transferência
-////                    TransferItem transferItem = transferItemMapper.toEntity(itemDto);
-//                    transferItem.setTransfer(savedTransfer);
-//                    TransferItem savedItem = transferItemRepository.save(transferItem);
-//
-//                    savedTransfer.addTransferDonationItem(savedItem);
+                    TransferItem transferItem = transferItemMapper.toEntity(itemDto, savedTransfer, item);
+                    TransferItem savedItem = transferItemRepository.saveAndFlush(transferItem);
+                    savedTransfer.addTransferDonationItem(savedItem);
                 });
             }
 

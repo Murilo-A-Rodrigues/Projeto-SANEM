@@ -1,14 +1,13 @@
 "use client";
 import MenuBar from "../components/menubar/menubar";
 import Navigation from "../components/navegation/navegation";
-import { mockEstoque as mockEstoqueOrig } from "../../mocks/mockEstoque";
 import styles from "./estoque.module.css";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-
-const STORAGE_KEY = "mockEstoque";
+import { itemService } from "@/itemService";
 
 export default function EstoquePage() {
+<<<<<<< Updated upstream
   const [mockEstoque, setMockEstoque] = useState([]);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -26,36 +25,36 @@ export default function EstoquePage() {
     tamanho: "",
     quantidade: "",
   });
+=======
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+>>>>>>> Stashed changes
   const router = useRouter();
   const hasNotification = false;
 
-  // 🔹 Carrega do localStorage ou, se não tiver, inicializa com o mock do arquivo
   useEffect(() => {
-    if (typeof window === "undefined") return;
-
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        if (Array.isArray(parsed)) {
-          setMockEstoque(parsed);
-          return;
-        }
-      }
-    } catch (e) {
-      console.error("Erro lendo estoque do localStorage:", e);
-    }
-
-    // fallback: mock original
-    setMockEstoque(mockEstoqueOrig);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(mockEstoqueOrig));
+    carregarEstoque();
   }, []);
 
-  function salvarNoStorage(updated) {
-    if (typeof window === "undefined") return;
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+  const carregarEstoque = async () => {
+    setLoading(true);
+    try {
+      const data = await itemService.getAll();
+      setItems(Array.isArray(data) ? data : []);
+    } catch (e) {
+      console.error("Erro ao carregar estoque:", e);
+      setItems([]);
+    }
+    setLoading(false);
+  };
+
+
+  function toCategoryName(category) {
+    if (!category || typeof category !== "object") return "-";
+    return category.name || category.toString() || "-";
   }
 
+<<<<<<< Updated upstream
   function handleAddProduto(e) {
     e.preventDefault();
     const novo = {
@@ -129,6 +128,11 @@ export default function EstoquePage() {
   // (essa função do router vc nem está usando, mas deixei se quiser telas futuras)
   function handleEditProduto(item) {
     router.push(`/estoque/editar/${item.id}`);
+=======
+  function toSizeName(size) {
+    if (!size || typeof size !== "object") return "-";
+    return size.name || size.description || size.toString() || "-";
+>>>>>>> Stashed changes
   }
 
   return (
@@ -137,6 +141,7 @@ export default function EstoquePage() {
       <div className={styles.container}>
         <MenuBar hasNotification={hasNotification} />
         <main className={styles.main}>
+<<<<<<< Updated upstream
           <h1 className={styles.titulo}>Controle de Estoque</h1>
           <div
             style={{
@@ -241,96 +246,54 @@ export default function EstoquePage() {
                       </td>
                     </>
                   )}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-
-          {/* Modal Adicionar */}
-          {showAddModal && (
-            <div className={styles.modalOverlay}>
-              <div className={styles.modal}>
-                <h2
-                  className={styles.titulo}
-                  style={{ fontSize: "1.3rem", marginBottom: 16 }}
-                >
-                  Adicionar Produto
-                </h2>
-                <form className={styles.formulario} onSubmit={handleAddProduto}>
-                  <label className={styles.formLabel}>
-                    Nome
-                    <input
-                      className={styles.formInput}
-                      required
-                      value={novoProduto.nome}
-                      onChange={(e) =>
-                        setNovoProduto({ ...novoProduto, nome: e.target.value })
-                      }
-                    />
-                  </label>
-                  <label className={styles.formLabel}>
-                    Categoria
-                    <input
-                      className={styles.formInput}
-                      required
-                      value={novoProduto.categoria}
-                      onChange={(e) =>
-                        setNovoProduto({
-                          ...novoProduto,
-                          categoria: e.target.value,
-                        })
-                      }
-                    />
-                  </label>
-                  <label className={styles.formLabel}>
-                    Tamanho
-                    <input
-                      className={styles.formInput}
-                      required
-                      value={novoProduto.tamanho}
-                      onChange={(e) =>
-                        setNovoProduto({
-                          ...novoProduto,
-                          tamanho: e.target.value,
-                        })
-                      }
-                    />
-                  </label>
-                  <label className={styles.formLabel}>
-                    Quantidade
-                    <input
-                      className={styles.formInput}
-                      required
-                      type="number"
-                      min={1}
-                      value={novoProduto.quantidade}
-                      onChange={(e) =>
-                        setNovoProduto({
-                          ...novoProduto,
-                          quantidade: e.target.value,
-                        })
-                      }
-                    />
-                  </label>
-                  <div className={styles.modalBotoes}>
-                    <button
-                      type="button"
-                      className={`${styles.btn} ${styles.btnExcluir}`}
-                      onClick={() => setShowAddModal(false)}
-                    >
-                      Cancelar
-                    </button>
-                    <button
-                      type="submit"
-                      className={`${styles.btn} ${styles.btnAdicionar}`}
-                    >
-                      Adicionar
-                    </button>
-                  </div>
-                </form>
-              </div>
+=======
+          <div className={styles.headerContainer}>
+            <h1 className={styles.titulo}>Controle de Estoque</h1>
+            <div className={styles.headerButtons}>
+              <button
+                className={`${styles.btn} ${styles.btnDoacao}`}
+                onClick={() => router.push("/cadastrodoacao")}
+              >
+                + Registrar Doação
+              </button>
+              <button
+                className={`${styles.btn} ${styles.btnRepasse}`}
+                onClick={() => router.push("/cadastrorepasse")}
+              >
+                + Registrar Repasse
+              </button>
             </div>
+          </div>
+          {loading ? (
+            <p style={{ color: "#6b7280", marginTop: 40 }}>Carregando estoque...</p>
+          ) : (
+            <table className={styles.tabela}>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Tipo</th>
+                  <th>Categoria</th>
+                  <th>Tamanho</th>
+                  <th>Quantidade</th>
+                  <th>Doador</th>
+>>>>>>> Stashed changes
+                </tr>
+              </thead>
+              <tbody>
+                {items.map((item) => (
+                  <tr key={item.id}>
+                    <td>{item.id}</td>
+                    <td>{item.name}</td>
+                    <td>{toCategoryName(item.category)}</td>
+                    <td>{toSizeName(item.size)}</td>
+                    <td>{item.quantity}</td>
+                    <td>{item.sex === 'm' ? 'Masculino' : 'Feminino'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           )}
+<<<<<<< Updated upstream
 
           {/* Modal Excluir */}
           {showDeleteModal && (
@@ -362,6 +325,12 @@ export default function EstoquePage() {
                 </div>
               </div>
             </div>
+=======
+          {!loading && items.length === 0 && (
+            <p style={{ color: "#6b7280", marginTop: 20 }}>
+              Nenhum item no estoque.
+            </p>
+>>>>>>> Stashed changes
           )}
         </main>
       </div>

@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.time.ZonedDateTime;
+import java.util.UUID;
 
 @Component
 public class DonationMapper {
@@ -17,13 +18,17 @@ public class DonationMapper {
 
 
     public DonationResponseDto toResponse(Donation donation) {
+        UUID giverId = donation.getGiver() != null ? donation.getGiver().getId() : null;
+        UUID voluntaryId = donation.getVoluntary() != null ? donation.getVoluntary().getId() : null;
         return new DonationResponseDto(
                 donation.getId(),
-                donation.getGiver().getId(),
-                donation.getVoluntary().getId(),
+                giverId,
+                voluntaryId,
                 donation.getCreatedAt(),
-                donation.getDonationItems().stream()
-                        .map(donationItemMapper::toResponse).toList()
+                donation.getDonationItems() != null
+                        ? donation.getDonationItems().stream()
+                                .map(donationItemMapper::toResponse).toList()
+                        : java.util.Collections.emptyList()
         );
     }
 
