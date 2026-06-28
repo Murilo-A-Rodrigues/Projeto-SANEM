@@ -3,7 +3,6 @@
 import { useState } from "react";
 import Image from "next/image";
 import Navigation from "../components/navegation/navegation";
-import MenuBar from "../components/menubar/menubar";
 
 export default function ConfiguracoesPage() {
   const [nome, setNome] = useState("Seu Nome Atual");
@@ -41,8 +40,6 @@ export default function ConfiguracoesPage() {
       <Navigation />
 
       <div style={{ minHeight: "100vh", background: "#fff", marginLeft: 220 }}>
-        <MenuBar />
-
         <main
           style={{
             maxWidth: 700,

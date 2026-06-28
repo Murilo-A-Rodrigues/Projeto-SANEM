@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import Navigation from "../components/navegation/navegation";
-import MenuBar from "../components/menubar/menubar";
 import UserCard from "../components/UserCard";
 
 export default function UsuariosPage() {
@@ -28,7 +27,6 @@ export default function UsuariosPage() {
     <>
       <Navigation />
       <div style={{ minHeight: "100vh", background: "#fff", marginLeft: 220 }}>
-        <MenuBar />
         <main
           style={{
             display: "flex",

@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Navigation from "../components/navegation/navegation";
-import MenuBar from "../components/menubar/menubar";
 
 const STORAGE_DOACOES = "mockDoacoes";
 const STORAGE_REPASSES = "mockRepasses";
@@ -64,7 +63,6 @@ export default function DoacoesPage() {
     <>
       <Navigation />
       <div style={{ minHeight: "100vh", background: "#fff", marginLeft: 220 }}>
-        <MenuBar hasNotification={hasNotification} />
         <main
           style={{
             padding: "40px",

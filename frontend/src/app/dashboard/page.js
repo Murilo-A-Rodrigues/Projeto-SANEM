@@ -1,6 +1,5 @@
 "use client";
 import Navigation from "../components/navegation/navegation";
-import MenuBar from "../components/menubar/menubar";
 import { useEffect, useState } from "react";
 import {
   BarChart,
@@ -113,7 +112,6 @@ export default function DashboardPage() {
     <>
       <Navigation />
       <div style={{ minHeight: "100vh", background: "#fff", marginLeft: 220 }}>
-        <MenuBar />
         <main
           style={{
             display: "flex",
