@@ -1,7 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import MenuBar from "../components/menubar/menubar";
 import Navegation from "../components/navegation/navegation";
 import styles from "./cadastrodoador.module.css";
 import { giverService } from "../../giverService";
@@ -170,7 +169,6 @@ const CadastroDoador = () => {
 
   return (
     <div className={styles.containerGeral}>
-      <MenuBar />
       <Navegation />
       <div className={styles.formWrapper}>
         <div className={styles.formContainer}>

@@ -2,13 +2,11 @@ package com.oficina_dev.backend.services;
 
 import com.oficina_dev.backend.dtos.Donation.DonationRequestDto;
 import com.oficina_dev.backend.dtos.Donation.DonationResponseDto;
+import com.oficina_dev.backend.dtos.DonationItem.DonationItemRequestDto;
 import com.oficina_dev.backend.mappers.DonationMapper;
 import com.oficina_dev.backend.mappers.DonationItemMapper;
 import com.oficina_dev.backend.models.Donation.Donation;
-<<<<<<< Updated upstream
-=======
 import com.oficina_dev.backend.models.Donation.DonationStatus;
->>>>>>> Stashed changes
 import com.oficina_dev.backend.models.DonationItem.DonationItem;
 import com.oficina_dev.backend.models.Giver.Giver;
 import com.oficina_dev.backend.models.Voluntary.Voluntary;
@@ -72,22 +70,24 @@ public class DonationService {
                     dto.getVoluntaryId());
 
         try {
-            Giver giver = giverService.findById(dto.getGiverId());
-            Voluntary voluntary = voluntaryService.findById(dto.getVoluntaryId());
+            Giver giver = null;
+            Voluntary voluntary = null;
+            if (dto.getGiverId() != null) {
+                giver = giverService.findById(dto.getGiverId());
+            }
+            if (dto.getVoluntaryId() != null) {
+                voluntary = voluntaryService.findById(dto.getVoluntaryId());
+            }
             Donation donation = donationRepository.saveAndFlush(new Donation(giver, voluntary));
 
             if (dto.getDonationItems() != null && !dto.getDonationItems().isEmpty()) {
-                dto.getDonationItems().forEach(donationItemDto -> {
+                for (DonationItemRequestDto donationItemDto : dto.getDonationItems()) {
                     DonationItem donationItem = donationItemMapper
                             .toEntity(donationItemDto, donation, itemService.findById(donationItemDto.getItemId()));
-<<<<<<< Updated upstream
-                    donationItem.getItem().incrementQuantity(donationItem.getQuantity());
-                    itemService.save(donationItem.getItem());
-=======
->>>>>>> Stashed changes
-                    donation.addDonationItem(donationItemRepository.saveAndFlush(donationItem));
-                });
+                    donationItemRepository.saveAndFlush(donationItem);
+                }
             }
+
             logger.info("Donation created successfully with ID: {}", donation.getId());
             return donationMapper.toResponse(donation);
         } catch (EntityNotFoundException e) {
@@ -99,9 +99,6 @@ public class DonationService {
         }
     }
 
-<<<<<<< Updated upstream
-}
-=======
     @Transactional
     public DonationResponseDto receiveDonation(UUID donationId) {
         logger.info("Receiving donation with ID: {}", donationId);
@@ -135,4 +132,3 @@ public class DonationService {
     }
 
 }
->>>>>>> Stashed changes

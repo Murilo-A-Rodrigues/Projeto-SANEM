@@ -46,7 +46,7 @@ public class DonationItem {
     @JoinColumn(name = "id_donation")
     private Donation donation;
 
-    public DonationItem(DonationItemId id, Integer quantity, Donation donation, Item item) {
+    public DonationItem(Integer quantity, Donation donation, Item item) {
         this.setQuantity(quantity);
         this.donation = donation;
         this.item = item;

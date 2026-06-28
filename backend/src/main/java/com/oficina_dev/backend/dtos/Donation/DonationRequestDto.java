@@ -1,7 +1,7 @@
 package com.oficina_dev.backend.dtos.Donation;
 
 import com.oficina_dev.backend.dtos.DonationItem.DonationItemRequestDto;
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -12,13 +12,11 @@ import java.util.UUID;
 @Setter
 public class DonationRequestDto {
 
-    @NotBlank
     private UUID giverId;
 
-    @NotBlank
     private UUID voluntaryId;
 
-    @NotBlank
+    @NotNull
     private List<DonationItemRequestDto> donationItems;
 
 }

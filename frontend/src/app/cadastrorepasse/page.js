@@ -1,14 +1,11 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import MenuBar from "../components/menubar/menubar";
 import Navigation from "../components/navegation/navegation";
 import styles from "./cadastrorepasse.module.css";
 import { receiverService } from "../../receiverService";
 import { transferService } from "../../transferService";
-
-const STORAGE_KEY = "mockEstoque";
-const STORAGE_TRANSFERS = "mockRepasses";
+import { itemService } from "../../itemService";
 
 export default function CadastroRepasse() {
   const router = useRouter();
@@ -34,31 +31,37 @@ export default function CadastroRepasse() {
   const carregarDados = async () => {
     try {
       setLoading(true);
-      // Tenta carregar beneficiários da API
-      try {
-        const beneficiariosData = await receiverService.getAll();
-        if (beneficiariosData && beneficiariosData.length > 0) {
-          setBeneficiarios(beneficiariosData);
-        }
-      } catch (err) {
-        console.log("API não disponível para beneficiários:", err.message);
-      }
-
-      // Carrega estoque do localStorage (apenas itens com quantidade > 0)
-      if (typeof window !== "undefined") {
-        const stored = localStorage.getItem(STORAGE_KEY);
-        if (stored) {
-          const parsed = JSON.parse(stored);
-          if (Array.isArray(parsed)) {
-            setEstoque(parsed.filter((item) => (item.quantidade || 0) > 0));
-          }
-        }
-      }
+      await Promise.all([
+        carregarBeneficiarios(),
+        carregarEstoque(),
+      ]);
     } catch (err) {
       console.error("Erro ao carregar dados:", err);
       setError("Erro ao carregar dados: " + (err.message || "Erro desconhecido"));
     } finally {
       setLoading(false);
+    }
+  };
+
+  const carregarBeneficiarios = async () => {
+    try {
+      const data = await receiverService.getAll();
+      if (data && data.length > 0) {
+        setBeneficiarios(data);
+      }
+    } catch (err) {
+      console.log("API não disponível para beneficiários:", err.message);
+    }
+  };
+
+  const carregarEstoque = async () => {
+    try {
+      const data = await itemService.getAll();
+      const lista = Array.isArray(data) ? data : [];
+      setEstoque(lista.filter((item) => (item.quantity || 0) > 0));
+    } catch (e) {
+      console.error("Erro ao carregar estoque do backend:", e);
+      setEstoque([]);
     }
   };
 
@@ -130,9 +133,9 @@ export default function CadastroRepasse() {
 
     for (const item of itensValidos) {
       const estoqueItem = estoque.find((e) => e.id === item.id);
-      if (!estoqueItem || item.quantidadeSelecionada > estoqueItem.quantidade) {
+      if (!estoqueItem || item.quantidadeSelecionada > estoqueItem.quantity) {
         setError(
-          `Quantidade do item "${item.nome}" excede o estoque disponível (${estoqueItem?.quantidade || 0}).`
+          `Quantidade do item "${item.name}" excede o estoque disponível (${estoqueItem?.quantity || 0}).`
         );
         setLoading(false);
         return;
@@ -140,70 +143,32 @@ export default function CadastroRepasse() {
     }
 
     try {
-      let nomeBeneficiario = "";
       let receiverId = null;
       if (form.beneficiarioTipo === "existente") {
-        const ben = beneficiarios.find((b) => b.id === form.beneficiarioId);
-        nomeBeneficiario = ben?.nomeCompleto || ben?.nome || ben?.name || "Beneficiário";
         receiverId = form.beneficiarioId;
       } else if (form.beneficiarioTipo === "novo") {
-        nomeBeneficiario = form.novoBeneficiarioNome;
+        const novoBeneficiario = await receiverService.create({
+          nomeCompleto: form.novoBeneficiarioNome,
+          email: form.novoBeneficiarioEmail || null,
+          telefone: form.novoBeneficiarioTelefone || null,
+          cpf: form.novoBeneficiarioCpf || null,
+        });
+        receiverId = novoBeneficiario.id;
       }
 
-      // Prepara dados para envio ao backend
-      const transferData = {
+      const transferItems = itensValidos.map((i) => ({
+        itemId: i.id,
+        quantity: i.quantidadeSelecionada,
+      }));
+
+      await transferService.create({
         receiverId: receiverId,
         voluntaryId: null,
-        transferDonationItems: itensValidos.map((i) => ({
-          itemId: i.id,
-          quantity: i.quantidadeSelecionada,
-        })),
-      };
-
-      // Tenta enviar ao backend
-      try {
-        await transferService.create(transferData);
-      } catch (apiErr) {
-        console.error("Falha ao enviar repasse para o servidor, salvando apenas localmente:", apiErr);
-        // Fallback: continua salvando no localStorage
-      }
-
-      // Atualiza o estoque (subtrai os itens)
-      if (typeof window !== "undefined") {
-        const stored = localStorage.getItem(STORAGE_KEY);
-        let estoqueAtual = stored ? JSON.parse(stored) : [];
-
-        for (const item of itensValidos) {
-          estoqueAtual = estoqueAtual.map((e) =>
-            e.id === item.id
-              ? { ...e, quantidade: (e.quantidade || 0) - item.quantidadeSelecionada }
-              : e
-          );
-        }
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(estoqueAtual));
-      }
-
-      // Registra o repasse
-      const storedRepasses = localStorage.getItem(STORAGE_TRANSFERS);
-      const repasses = storedRepasses ? JSON.parse(storedRepasses) : [];
-
-      const novoRepasse = {
-        id: Date.now(),
-        beneficiario: nomeBeneficiario,
-        data: new Date().toISOString(),
-        itens: itensValidos.map((i) => ({
-          nome: i.nome,
-          categoria: i.categoria,
-          tamanho: i.tamanho,
-          quantidade: i.quantidadeSelecionada,
-        })),
-      };
-
-      repasses.push(novoRepasse);
-      localStorage.setItem(STORAGE_TRANSFERS, JSON.stringify(repasses));
+        transferDonationItems: transferItems,
+      });
 
       alert("Repasse registrado com sucesso!");
-      router.push("/doacoes");
+      router.push("/estoque");
     } catch (err) {
       console.error("Erro ao registrar repasse:", err);
       setError("Erro ao registrar repasse: " + (err.message || "Erro desconhecido"));
@@ -214,9 +179,8 @@ export default function CadastroRepasse() {
 
   if (loading && beneficiarios.length === 0 && estoque.length === 0) {
     return (
-      <div className={styles.containerGeral}>
-        <MenuBar />
-        <Navigation />
+    <div className={styles.containerGeral}>
+      <Navigation />
         <div className={styles.formWrapper}>
           <p>Carregando...</p>
         </div>
@@ -226,7 +190,6 @@ export default function CadastroRepasse() {
 
   return (
     <div className={styles.containerGeral}>
-      <MenuBar />
       <Navigation />
       <div className={styles.formWrapper}>
         <div className={styles.formContainer}>
@@ -367,15 +330,15 @@ export default function CadastroRepasse() {
                       );
                       return (
                         <tr key={item.id}>
-                          <td>{item.nome}</td>
-                          <td>{item.categoria || "-"}</td>
-                          <td>{item.tamanho || "-"}</td>
-                          <td>{item.quantidade}</td>
+                          <td>{item.name}</td>
+                          <td>{item.category?.name || item.category || "-"}</td>
+                          <td>{item.size?.name || item.size || "-"}</td>
+                          <td>{item.quantity}</td>
                           <td>
                             <input
                               type="number"
                               min={0}
-                              max={item.quantidade}
+                              max={item.quantity}
                               className={styles.qtdInput}
                               value={itemSelecionado?.quantidadeSelecionada || ""}
                               onChange={(e) =>
@@ -410,9 +373,9 @@ export default function CadastroRepasse() {
                       .filter((i) => i.quantidadeSelecionada > 0)
                       .map((item) => (
                         <li key={item.id} className={styles.resumoItem}>
-                          {item.nome} - {item.quantidadeSelecionada}x
-                          {item.categoria ? ` (${item.categoria})` : ""}
-                          {item.tamanho ? ` [${item.tamanho}]` : ""}
+                          {item.name} - {item.quantidadeSelecionada}x
+                          {item.category?.name ? ` (${item.category.name})` : ""}
+                          {item.size?.name ? ` [${item.size.name}]` : ""}
                         </li>
                       ))}
                   </ul>
@@ -426,7 +389,7 @@ export default function CadastroRepasse() {
               <button
                 type="button"
                 className={styles.btnCancelar}
-                onClick={() => router.push("/doacoes")}
+                onClick={() => router.push("/estoque")}
               >
                 Cancelar
               </button>

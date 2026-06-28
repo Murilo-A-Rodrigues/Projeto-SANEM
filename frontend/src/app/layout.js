@@ -1,4 +1,5 @@
 import { Poppins } from 'next/font/google'
+import MenuBar from './components/menubar/menubar'
 
 const poppins = Poppins({
   subsets: ['latin'],
@@ -13,7 +14,10 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="pt-BR">
-      <body className={poppins.className}>{children}</body>
+      <body className={poppins.className}>
+        <MenuBar />
+        {children}
+      </body>
     </html>
   )
 }

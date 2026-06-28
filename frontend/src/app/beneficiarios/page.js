@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Navigation from "../components/navegation/navegation";
-import MenuBar from "../components/menubar/menubar";
 import { receiverService } from "../../receiverService";
 
 export default function BeneficiariosPage() {
@@ -68,7 +67,6 @@ export default function BeneficiariosPage() {
     <>
       <Navigation />
       <div style={{ minHeight: "100vh", background: "#fff", marginLeft: 220 }}>
-        <MenuBar />
         <main
           style={{
             display: "flex",

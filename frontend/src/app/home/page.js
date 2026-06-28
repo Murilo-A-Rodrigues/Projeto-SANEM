@@ -1,6 +1,5 @@
 "use client";
 
-import MenuBar from '../components/menubar/menubar';
 import Image from 'next/image';
 import Link from 'next/link';
 import Navigation from '../components/navegation/navegation';
@@ -55,7 +54,6 @@ export default function Home() {
   return (
     <div className={styles.container}>
       <Navigation />
-      <MenuBar onEstoqueBaixo={setEstoqueBaixo} />
       
       {showAlert && estoqueBaixo && (
         <div style={{

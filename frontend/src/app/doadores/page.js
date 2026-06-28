@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Navigation from "../components/navegation/navegation";
-import MenuBar from "../components/menubar/menubar";
 import { giverService } from "../../giverService";
 
 export default function DoadoresPage() {
@@ -64,7 +63,6 @@ export default function DoadoresPage() {
     <>
       <Navigation />
       <div style={{ minHeight: "100vh", background: "#fff", marginLeft: 220 }}>
-        <MenuBar />
         <main
           style={{
             display: "flex",

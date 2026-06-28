@@ -80,14 +80,20 @@ public class TransferService {
     @Transactional
     public TransferResponseDto create(TransferRequestDto transferRequestDto) {
         logger.info("Creating transfer with {} items, receiver ID: {}, voluntary ID: {}",
-                    transferRequestDto.getTransferDonationItems().size(),
+                    transferRequestDto.getTransferDonationItems() != null
+                            ? transferRequestDto.getTransferDonationItems().size()
+                            : 0,
                     transferRequestDto.getReceiverId(),
                     transferRequestDto.getVoluntaryId());
 
         try {
-            // Buscar entidades relacionadas
-            Receiver receiver = receiverService.findById(transferRequestDto.getReceiverId());
-            Voluntary voluntary = voluntaryService.findById(transferRequestDto.getVoluntaryId());
+            // Buscar entidades relacionadas (IDs podem ser nulos)
+            Receiver receiver = transferRequestDto.getReceiverId() != null
+                    ? receiverService.findById(transferRequestDto.getReceiverId())
+                    : null;
+            Voluntary voluntary = transferRequestDto.getVoluntaryId() != null
+                    ? voluntaryService.findById(transferRequestDto.getVoluntaryId())
+                    : null;
 
             // Criar entidade Transfer
             Transfer transfer = new Transfer(receiver, voluntary);

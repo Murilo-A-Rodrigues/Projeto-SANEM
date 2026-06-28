@@ -1,21 +1,23 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import MenuBar from "../components/menubar/menubar";
 import Navigation from "../components/navegation/navegation";
 import styles from "./cadastrodoacao.module.css";
 import { giverService } from "../../giverService";
 import { donationService } from "../../donationService";
 import { itemService } from "../../itemService";
+import { categoryService } from "../../categoryService";
+import { sizeService } from "../../sizeService";
 
-const STORAGE_KEY = "mockEstoque";
+function normalizarNome(str) {
+  return (str || "").toLowerCase().trim();
+}
 
 export default function CadastroDoacao() {
   const router = useRouter();
   const [doadores, setDoadores] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [estoque, setEstoque] = useState([]);
 
   const [form, setForm] = useState({
     doadorTipo: "existente",
@@ -32,7 +34,6 @@ export default function CadastroDoacao() {
 
   useEffect(() => {
     carregarDoadores();
-    carregarEstoque();
   }, []);
 
   const carregarDoadores = async () => {
@@ -46,16 +47,6 @@ export default function CadastroDoacao() {
       console.log("API não disponível para doadores:", err.message);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const carregarEstoque = async () => {
-    try {
-      const data = await itemService.getAll();
-      setEstoque(Array.isArray(data) ? data : []);
-    } catch (e) {
-      console.error("Erro ao carregar estoque:", e);
-      setEstoque([]);
     }
   };
 
@@ -90,101 +81,53 @@ export default function CadastroDoacao() {
     }
 
     try {
-      let nomeDoador = "Anônimo";
       let giverId = null;
       if (form.doadorTipo === "existente") {
-        const doador = doadores.find((d) => d.id === form.doadorId);
-        nomeDoador = doador?.nomeCompleto || doador?.nome || doador?.name || "Doador";
         giverId = form.doadorId;
       } else if (form.doadorTipo === "novo") {
-        nomeDoador = form.novoDoadorNome;
+        // Cria novo doador no backend e obtém o ID
+        const novoDoador = await giverService.create({
+          nomeCompleto: form.novoDoadorNome,
+          email: form.novoDoadorEmail || null,
+          telefone: form.novoDoadorTelefone || null,
+          cpf: form.novoDoadorCpf || null,
+        });
+        giverId = novoDoador.id;
       }
 
-      // Tenta enviar doação ao backend
-      try {
-        const itemExistente = estoque.find(
-          (i) =>
-            (i.nome || "").toLowerCase() === (form.tipoDoacao || "Doação").toLowerCase() &&
-            (i.categoria || "").toLowerCase() === (form.categoria || "").toLowerCase() &&
-            (i.tamanho || "").toLowerCase() === (form.tamanho || "").toLowerCase()
-        );
+      const itemNome = form.tipoDoacao || "Doação";
 
-        let itemId = itemExistente ? itemExistente.id : null;
+      // Busca/cria categoria e tamanho para obter IDs
+      const categoriaObj = await categoryService.findOrCreateByName(form.categoria);
+      const tamanhoObj = await sizeService.findOrCreateByName(form.tamanho);
 
-        // Se não existe no backend, cria o item primeiro
-        if (!itemId) {
-          try {
-            const novoItem = await itemService.create({
-              nome: form.tipoDoacao || "Doação",
-              categoria: form.categoria || "",
-              tamanho: form.tamanho || "",
-              quantidade: quantidade,
-            });
-            itemId = novoItem.id;
-          } catch (itemErr) {
-            console.error("Falha ao criar item no backend:", itemErr);
-          }
-        }
+      const categoryId = categoriaObj?.id || null;
+      const sizeId = tamanhoObj?.id || null;
 
-        if (itemId && giverId) {
-          await donationService.create({
-            giverId: giverId,
-            voluntaryId: null,
-            donationItems: [
-              {
-                itemId: itemId,
-                quantity: quantidade,
-              },
-            ],
-          });
-        }
-      } catch (apiErr) {
-        console.error("Falha ao enviar doação para o servidor, salvando apenas localmente:", apiErr);
-      }
+      // Cria o item no backend
+      const payload = {
+        name: itemNome,
+        quantity: Number(quantidade),
+      };
+      if (categoryId) payload.categoryId = categoryId;
+      if (sizeId) payload.sizeId = sizeId;
 
-      // Salva no localStorage
-      if (typeof window !== "undefined") {
-        const stored = localStorage.getItem(STORAGE_KEY);
-        let estoqueAtual = stored ? JSON.parse(stored) : [];
+      const novoItem = await itemService.create(payload);
 
-        const novoItemId = estoqueAtual.length
-          ? Math.max(...estoqueAtual.map((i) => i.id)) + 1
-          : 1;
-
-        const novoItem = {
-          id: novoItemId,
-          nome: form.tipoDoacao || "Doação",
-          categoria: form.categoria,
-          tamanho: form.tamanho,
-          quantidade: quantidade,
-        };
-
-        estoqueAtual.push(novoItem);
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(estoqueAtual));
-
-        const STORAGE_DOACOES = "mockDoacoes";
-        const storedDoacoes = localStorage.getItem(STORAGE_DOACOES);
-        const doacoes = storedDoacoes ? JSON.parse(storedDoacoes) : [];
-
-        const hoje = new Date();
-        const novaDoacao = {
-          id: Date.now(),
-          user: nomeDoador,
-          action: form.tipoDoacao || "Doação",
-          date: hoje.toISOString(),
-          tipo: form.tipoDoacao,
-          categoria: form.categoria,
-          tamanho: form.tamanho,
-          quantidade: quantidade,
-          itemEstoqueId: novoItemId,
-        };
-
-        doacoes.push(novaDoacao);
-        localStorage.setItem(STORAGE_DOACOES, JSON.stringify(doacoes));
-      }
+      // Cria a doação vinculando ao item criado
+      await donationService.create({
+        giverId: giverId,
+        voluntaryId: null,
+        donationItems: [
+          {
+            itemId: novoItem.id,
+            quantity: Number(quantidade),
+          },
+        ],
+      });
 
       alert("Doação registrada com sucesso!");
-      router.push("/doacoes");
+      router.push("/estoque");
     } catch (err) {
       console.error("Erro ao registrar doação:", err);
       setError("Erro ao registrar doação: " + (err.message || "Erro desconhecido"));
@@ -195,9 +138,8 @@ export default function CadastroDoacao() {
 
   if (loading && doadores.length === 0) {
     return (
-      <div className={styles.containerGeral}>
-        <MenuBar />
-        <Navigation />
+    <div className={styles.containerGeral}>
+      <Navigation />
         <div className={styles.formWrapper}>
           <p>Carregando...</p>
         </div>
@@ -207,7 +149,6 @@ export default function CadastroDoacao() {
 
   return (
     <div className={styles.containerGeral}>
-      <MenuBar />
       <Navigation />
       <div className={styles.formWrapper}>
         <div className={styles.formContainer}>
@@ -395,7 +336,7 @@ export default function CadastroDoacao() {
               <button
                 type="button"
                 className={styles.btnCancelar}
-                onClick={() => router.push("/doacoes")}
+                onClick={() => router.push("/estoque")}
               >
                 Cancelar
               </button>

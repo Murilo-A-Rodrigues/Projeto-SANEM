@@ -18,6 +18,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/items")
+@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:3001", "http://localhost:5173", "http://localhost:8080"})
 public class ItemController {
 
     private static final Logger logger = LoggerFactory.getLogger(ItemController.class);
@@ -27,7 +28,9 @@ public class ItemController {
 
     @GetMapping
     public ResponseEntity<List<ItemResponseDto>> getAll(){
+        logger.info("Controller: Buscando todos os itens");
         List<ItemResponseDto> items = itemService.getAll();
+        logger.info("Controller: Retornando {} itens", items.size());
         return ResponseEntity.ok(items);
     }
 

@@ -22,11 +22,12 @@ public class DonationItemMapper {
     }
 
     public DonationItem toEntity(DonationItemRequestDto donationItemRequestDto, Donation donation, Item item) {
-        return new DonationItem(
-                new DonationItemId(donation.getId(), item.getId()),
+        DonationItem donationItem = new DonationItem(
                 donationItemRequestDto.getQuantity(),
                 donation,
                 item
         );
+        donationItem.setId(new DonationItemId(donation.getId(), item.getId()));
+        return donationItem;
     }
 }

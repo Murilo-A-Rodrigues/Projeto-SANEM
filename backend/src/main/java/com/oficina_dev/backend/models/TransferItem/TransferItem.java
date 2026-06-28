@@ -44,8 +44,8 @@ public class TransferItem {
     private Transfer transfer;
 
     public TransferItem(TransferItemId id, Integer quantity, Item item, Transfer transfer) {
-        this.setQuantity(quantity);
         this.id = id;
+        this.setQuantity(quantity);
         this.item = item;
         this.transfer = transfer;
     }

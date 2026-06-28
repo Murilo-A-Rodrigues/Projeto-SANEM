@@ -1,11 +1,33 @@
 "use client";
 
+import { useEffect, useState } from 'react';
 import styles from './menuBar.module.css';
 import Image from 'next/image';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { itemService } from '@/itemService';
 
-export default function MenuBar({ hasNotification }) {
+export default function MenuBar() {
   const router = useRouter();
+  const [hasNotification, setHasNotification] = useState(false);
+  const [showWarningPopup, setShowWarningPopup] = useState(false);
+
+  useEffect(() => {
+    const checkStock = async () => {
+      try {
+        const data = await itemService.getAll();
+        if (!Array.isArray(data)) {
+          setHasNotification(true);
+          return;
+        }
+        const total = data.reduce((sum, item) => sum + (item.quantity ?? item.quantidade ?? 0), 0);
+        setHasNotification(total < 10);
+      } catch (e) {
+        setHasNotification(true);
+      }
+    };
+    checkStock();
+  }, []);
 
   const handleLogout = () => {
     if (confirm("Tem certeza que deseja fazer logout?")) {
@@ -16,22 +38,28 @@ export default function MenuBar({ hasNotification }) {
   };
 
   return (
-    <header className={styles.menuBar}>
-      <div className={styles.rightSection}>
-        <div className={styles.userInfo}>
-          <UserIcon />
-          <span className={styles.userName}>Fulano da Silva</span>
-          <span className={styles.arrowDown}>▼</span>
+    <>
+      <header className={styles.menuBar}>
+        <div className={styles.rightSection}>
+          <div className={styles.userInfo}>
+            <UserIcon />
+            {hasNotification && (
+              <button
+                className={styles.warningIconBtn}
+                onClick={() => setShowWarningPopup(true)}
+                title="Estoque baixo! Clique para mais detalhes"
+                style={{ fontSize: 20, lineHeight: 1 }}
+              >
+                ⚠️
+              </button>
+            )}
+            <span className={styles.userName}>Fulano da Silva</span>
+            <span className={styles.arrowDown}>▼</span>
+          </div>
+          <div className={styles.iconWrapper}>
+            <LogoutIcon onLogout={handleLogout} />
+          </div>
         </div>
-<<<<<<< Updated upstream
-        <div className={styles.iconWrapper} style={{ position: 'relative' }}>
-        </div>
-        <div className={styles.iconWrapper}>
-          <LogoutIcon onLogout={handleLogout} />
-        </div>
-      </div>
-    </header>
-=======
       </header>
 
       {showWarningPopup && hasNotification && (
@@ -110,7 +138,6 @@ export default function MenuBar({ hasNotification }) {
         </>
       )}
     </>
->>>>>>> Stashed changes
   );
 }
 

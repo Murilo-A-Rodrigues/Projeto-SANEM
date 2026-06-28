@@ -1,13 +1,11 @@
 "use client";
 
-import MenuBar from '../components/menubar/menubar';
 import Navigation from '../components/navegation/navegation';
 import styles from './cadastrooption.module.css';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 export default function Cadastrooption() {
-  const hasNotification = true;
   const [selected, setSelected] = useState('doador');
   const router = useRouter();
 
@@ -21,7 +19,6 @@ export default function Cadastrooption() {
     <div className={styles.containerGeral}>
       <Navigation />
       <div className={styles.contentWrapper}>
-        <MenuBar hasNotification={hasNotification} />
         <main className={styles.main}>
           <div className={styles.boxCadastro}>
             <h1 className={styles.titulo}>Selecione o tipo de cadastro</h1>
@@ -40,11 +37,16 @@ export default function Cadastrooption() {
                 <span className={styles.radioText}><b>Voluntário</b></span>
               </label>
             </div>
-            <button className={styles.buttonAvancar} onClick={handleAvancar}>Avançar</button>
+            <button 
+              className={styles.buttonAvancar} 
+              onClick={handleAvancar}
+              style={{ background: '#2563eb', color: '#fff', border: 'none' }}
+            >
+              Avançar
+            </button>
           </div>
         </main>
       </div>
     </div>
   );
-} 
-
+}

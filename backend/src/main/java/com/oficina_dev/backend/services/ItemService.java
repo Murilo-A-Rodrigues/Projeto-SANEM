@@ -39,11 +39,16 @@ public class ItemService {
 
     public List<ItemResponseDto> getAll() {
         logger.debug("Service: Fetching all items");
-        List<Item> items = itemRepository.findAll();
-        logger.debug("Found {} items in database", items.size());
-        return items.stream()
-                .map(itemMapper::toResponse)
-                .toList();
+        try {
+            List<Item> items = itemRepository.findAll();
+            logger.info("Found {} items in database", items.size());
+            return items.stream()
+                    .map(itemMapper::toResponse)
+                    .toList();
+        } catch (Exception e) {
+            logger.error("Error fetching all items: {}", e.getMessage(), e);
+            throw e;
+        }
     }
 
     public ItemResponseDto getById(UUID id) {

@@ -35,8 +35,12 @@ public class ItemMapper {
         if (item == null) {
             return null;
         }
-        CategoryResponseDto categoryDto = categoryMapper.toResponse(item.getCategory());
-        SizeResponseDto sizeDto = sizeMapper.toResponse(item.getSize());
+        CategoryResponseDto categoryDto = item.getCategory() != null
+                ? categoryMapper.toResponse(item.getCategory())
+                : null;
+        SizeResponseDto sizeDto = item.getSize() != null
+                ? sizeMapper.toResponse(item.getSize())
+                : null;
         return new ItemResponseDto(
                 item.getId(),
                 item.getName(),
@@ -48,10 +52,16 @@ public class ItemMapper {
     }
 
     public Item toEntity(ItemRequestDto dto) {
-        Category category = categoryService.findById(dto.getCategoryId());
-        Size size = sizeService.findById(dto.getSizeId());
+        Category category = null;
+        Size size = null;
+        if (dto.getCategoryId() != null) {
+            category = categoryService.findById(dto.getCategoryId());
+        }
+        if (dto.getSizeId() != null) {
+            size = sizeService.findById(dto.getSizeId());
+        }
         return new Item(dto.getName(), dto.getQuantity(),
-                        dto.getSex(), category, size);
+                        dto.getSex() != null ? dto.getSex() : 'm', category, size);
     }
 
     public void update(Item item, ItemRequestDto dto) {

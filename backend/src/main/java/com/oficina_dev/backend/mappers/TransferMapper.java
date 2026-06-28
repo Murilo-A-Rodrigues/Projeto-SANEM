@@ -42,8 +42,8 @@ public class TransferMapper {
                 : Collections.emptyList();
 
         return new TransferResponseDto(
-                transfer.getReceiver().getId(),
-                transfer.getVoluntary().getId(),
+                transfer.getReceiver() != null ? transfer.getReceiver().getId() : null,
+                transfer.getVoluntary() != null ? transfer.getVoluntary().getId() : null,
                 transfer.getCreatedAt(),
                 items
         );

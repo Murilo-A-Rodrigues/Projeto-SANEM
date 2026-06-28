@@ -1,336 +1,259 @@
 "use client";
-import MenuBar from "../components/menubar/menubar";
 import Navigation from "../components/navegation/navegation";
 import styles from "./estoque.module.css";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { itemService } from "@/itemService";
+import { donationService } from "@/donationService";
+import { transferService } from "@/transferService";
 
 export default function EstoquePage() {
-<<<<<<< Updated upstream
-  const [mockEstoque, setMockEstoque] = useState([]);
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [itemToDelete, setItemToDelete] = useState(null);
-  const [novoProduto, setNovoProduto] = useState({
-    nome: "",
-    categoria: "",
-    tamanho: "",
-    quantidade: "",
-  });
-  const [editId, setEditId] = useState(null);
-  const [editProduto, setEditProduto] = useState({
-    nome: "",
-    categoria: "",
-    tamanho: "",
-    quantidade: "",
-  });
-=======
-  const [items, setItems] = useState([]);
-  const [loading, setLoading] = useState(true);
->>>>>>> Stashed changes
   const router = useRouter();
-  const hasNotification = false;
+  const [activeTab, setActiveTab] = useState("estoque");
+  const [estoque, setEstoque] = useState([]);
+  const [doacoes, setDoacoes] = useState([]);
+  const [repasses, setRepasses] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [totalStockQuantity, setTotalStockQuantity] = useState(0);
 
   useEffect(() => {
-    carregarEstoque();
+    carregarTudo();
   }, []);
 
-  const carregarEstoque = async () => {
+  const carregarTudo = async () => {
     setLoading(true);
-    try {
-      const data = await itemService.getAll();
-      setItems(Array.isArray(data) ? data : []);
-    } catch (e) {
-      console.error("Erro ao carregar estoque:", e);
-      setItems([]);
-    }
+    await Promise.all([
+      carregarEstoque(),
+      carregarDoacoes(),
+      carregarRepasses(),
+    ]);
     setLoading(false);
   };
 
+  const carregarEstoque = async () => {
+    try {
+      const data = await itemService.getAll();
+      if (!Array.isArray(data)) {
+      setEstoque([]);
+      setTotalStockQuantity(0);
+      return;
+      }
+      const comQuantidade = data.map((it) => ({
+        id: it.id,
+        tipo: it.name || it.nome || "-",
+        categoria: typeof it.category === "object" && it.category?.name
+          ? it.category.name
+          : it.categoria || it.category || "-",
+        tamanho: typeof it.size === "object" && it.size?.name
+          ? it.size.name
+          : it.tamanho || it.size || "-",
+        quantidade: it.quantity ?? it.quantidade ?? 0,
+      }));
+      setEstoque(comQuantidade.filter((it) => (it.quantidade || 0) > 0));
+      const total = comQuantidade.reduce((sum, item) => sum + (item.quantidade || 0), 0);
+      setTotalStockQuantity(total);
+    } catch (e) {
+      console.error("Erro ao carregar estoque:", e);
+      setEstoque([]);
+      setTotalStockQuantity(0);
+    }
+  };
 
-  function toCategoryName(category) {
-    if (!category || typeof category !== "object") return "-";
-    return category.name || category.toString() || "-";
-  }
+  const carregarDoacoes = async () => {
+    try {
+      const data = await donationService.getAll();
+      if (!Array.isArray(data)) { setDoacoes([]); return; }
+      const items = await itemService.getAll().catch(() => []);
+      const lista = data.map((d) => {
+        const dataStr = d.date ? new Date(d.date).toLocaleDateString("pt-BR") : "-";
+        const itensDoacao = (d.items || []).map((di) => {
+          const item = Array.isArray(items) ? items.find((i) => i.id === di.itemId) : null;
+          return {
+            tipo: item?.name || item?.nome || "-",
+            categoria: typeof item?.category === "object" && item.category?.name
+              ? item.category.name
+              : item?.categoria || item?.category || "-",
+            tamanho: typeof item?.size === "object" && item.size?.name
+              ? item.size.name
+              : item?.tamanho || item?.size || "-",
+            quantidade: di.quantity ?? 0,
+          };
+        });
+        return { id: d.id, doadorId: d.giverId, data: dataStr, itens: itensDoacao };
+      });
+      setDoacoes(lista);
+    } catch (e) {
+      console.error("Erro ao carregar doações:", e);
+      setDoacoes([]);
+    }
+  };
 
-<<<<<<< Updated upstream
-  function handleAddProduto(e) {
-    e.preventDefault();
-    const novo = {
-      id: mockEstoque.length ? Math.max(...mockEstoque.map((i) => i.id)) + 1 : 1,
-      ...novoProduto,
-      quantidade: Number(novoProduto.quantidade),
-    };
-    const updated = [...mockEstoque, novo];
-    setMockEstoque(updated);
-    salvarNoStorage(updated);
-    setNovoProduto({ nome: "", categoria: "", tamanho: "", quantidade: "" });
-    setShowAddModal(false);
-  }
-
-  function handleDeleteProduto() {
-    const updated = mockEstoque.filter((item) => item.id !== itemToDelete.id);
-    setMockEstoque(updated);
-    salvarNoStorage(updated);
-    setShowDeleteModal(false);
-    setItemToDelete(null);
-  }
-
-  function openDeleteModal(item) {
-    setItemToDelete(item);
-    setShowDeleteModal(true);
-  }
-
-  function startEditProduto(item) {
-    setEditId(item.id);
-    setEditProduto({
-      nome: item.nome,
-      categoria: item.categoria,
-      tamanho: item.tamanho,
-      quantidade: item.quantidade,
-    });
-  }
-
-  function handleEditChange(e) {
-    const { name, value } = e.target;
-    setEditProduto((prev) => ({
-      ...prev,
-      [name]: name === "quantidade" ? Number(value) : value,
-    }));
-  }
-
-  function saveEditProduto(id) {
-    const updated = mockEstoque.map((item) =>
-      item.id === id ? { ...item, ...editProduto } : item
-    );
-    setMockEstoque(updated);
-    salvarNoStorage(updated);
-    setEditId(null);
-    setEditProduto({
-      nome: "",
-      categoria: "",
-      tamanho: "",
-      quantidade: "",
-    });
-  }
-
-  function cancelEditProduto() {
-    setEditId(null);
-    setEditProduto({
-      nome: "",
-      categoria: "",
-      tamanho: "",
-      quantidade: "",
-    });
-  }
-
-  // (essa função do router vc nem está usando, mas deixei se quiser telas futuras)
-  function handleEditProduto(item) {
-    router.push(`/estoque/editar/${item.id}`);
-=======
-  function toSizeName(size) {
-    if (!size || typeof size !== "object") return "-";
-    return size.name || size.description || size.toString() || "-";
->>>>>>> Stashed changes
-  }
+  const carregarRepasses = async () => {
+    try {
+      const data = await transferService.getAll();
+      if (!Array.isArray(data)) { setRepasses([]); return; }
+      const items = await itemService.getAll().catch(() => []);
+      const lista = data.map((r) => {
+        const dataStr = r.date ? new Date(r.date).toLocaleDateString("pt-BR") : "-";
+        const itensRepasse = (r.items || []).map((ri) => {
+          const item = Array.isArray(items) ? items.find((i) => i.id === ri.itemId) : null;
+          return {
+            tipo: item?.name || item?.nome || "-",
+            categoria: typeof item?.category === "object" && item.category?.name
+              ? item.category.name
+              : item?.categoria || item?.category || "-",
+            tamanho: typeof item?.size === "object" && item.size?.name
+              ? item.size.name
+              : item?.tamanho || item?.size || "-",
+            quantidade: ri.quantity ?? 0,
+          };
+        });
+        return { id: r.id, beneficiarioId: r.receiverId, data: dataStr, itens: itensRepasse };
+      });
+      setRepasses(lista);
+    } catch (e) {
+      console.error("Erro ao carregar repasses:", e);
+      setRepasses([]);
+    }
+  };
 
   return (
     <>
       <Navigation />
       <div className={styles.container}>
-        <MenuBar hasNotification={hasNotification} />
         <main className={styles.main}>
-<<<<<<< Updated upstream
           <h1 className={styles.titulo}>Controle de Estoque</h1>
-          <div
-            style={{
-              width: "100%",
-              display: "flex",
-              justifyContent: "flex-end",
-              marginBottom: 24,
-            }}
-          >
-            <button
-              className={`${styles.btn} ${styles.btnAdicionar}`}
-              onClick={() => setShowAddModal(true)}
-            >
-              + Adicionar Produto
+
+          <div className={styles.buttonRow}>
+            <button className={styles.btnDoacao} onClick={() => router.push("/cadastrodoacao")}>
+              + Cadastrar Doação
+            </button>
+            <button className={styles.btnRepasse} onClick={() => router.push("/cadastrorepasse")}>
+              + Cadastrar Repasse
             </button>
           </div>
-          <table className={styles.tabela}>
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Nome</th>
-                <th>Categoria</th>
-                <th>Tamanho</th>
-                <th>Quantidade</th>
-                <th>Ações</th>
-              </tr>
-            </thead>
-            <tbody>
-              {mockEstoque.map((item) => (
-                <tr key={item.id}>
-                  <td>{item.id}</td>
-                  {editId === item.id ? (
-                    <>
-                      <td>
-                        <input
-                          className={styles.formInput}
-                          name="nome"
-                          value={editProduto.nome}
-                          onChange={handleEditChange}
-                        />
-                      </td>
-                      <td>
-                        <input
-                          className={styles.formInput}
-                          name="categoria"
-                          value={editProduto.categoria}
-                          onChange={handleEditChange}
-                        />
-                      </td>
-                      <td>
-                        <input
-                          className={styles.formInput}
-                          name="tamanho"
-                          value={editProduto.tamanho}
-                          onChange={handleEditChange}
-                        />
-                      </td>
-                      <td>
-                        <input
-                          className={styles.formInput}
-                          name="quantidade"
-                          type="number"
-                          min={1}
-                          value={editProduto.quantidade}
-                          onChange={handleEditChange}
-                        />
-                      </td>
-                      <td>
-                        <button
-                          className={`${styles.btn} ${styles.btnAdicionar}`}
-                          onClick={() => saveEditProduto(item.id)}
-                        >
-                          Salvar
-                        </button>
-                        <button
-                          className={`${styles.btn} ${styles.btnExcluir}`}
-                          onClick={cancelEditProduto}
-                        >
-                          Cancelar
-                        </button>
-                      </td>
-                    </>
-                  ) : (
-                    <>
-                      <td>{item.nome}</td>
-                      <td>{item.categoria}</td>
-                      <td>{item.tamanho}</td>
-                      <td>{item.quantidade}</td>
-                      <td>
-                        <button
-                          className={`${styles.btn} ${styles.btnEditar}`}
-                          onClick={() => startEditProduto(item)}
-                        >
-                          Editar
-                        </button>
-                        <button
-                          className={`${styles.btn} ${styles.btnExcluir}`}
-                          onClick={() => openDeleteModal(item)}
-                        >
-                          Excluir
-                        </button>
-                      </td>
-                    </>
-                  )}
-=======
-          <div className={styles.headerContainer}>
-            <h1 className={styles.titulo}>Controle de Estoque</h1>
-            <div className={styles.headerButtons}>
-              <button
-                className={`${styles.btn} ${styles.btnDoacao}`}
-                onClick={() => router.push("/cadastrodoacao")}
-              >
-                + Registrar Doação
-              </button>
-              <button
-                className={`${styles.btn} ${styles.btnRepasse}`}
-                onClick={() => router.push("/cadastrorepasse")}
-              >
-                + Registrar Repasse
-              </button>
-            </div>
-          </div>
-          {loading ? (
-            <p style={{ color: "#6b7280", marginTop: 40 }}>Carregando estoque...</p>
-          ) : (
-            <table className={styles.tabela}>
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>Tipo</th>
-                  <th>Categoria</th>
-                  <th>Tamanho</th>
-                  <th>Quantidade</th>
-                  <th>Doador</th>
->>>>>>> Stashed changes
-                </tr>
-              </thead>
-              <tbody>
-                {items.map((item) => (
-                  <tr key={item.id}>
-                    <td>{item.id}</td>
-                    <td>{item.name}</td>
-                    <td>{toCategoryName(item.category)}</td>
-                    <td>{toSizeName(item.size)}</td>
-                    <td>{item.quantity}</td>
-                    <td>{item.sex === 'm' ? 'Masculino' : 'Feminino'}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
-<<<<<<< Updated upstream
 
-          {/* Modal Excluir */}
-          {showDeleteModal && (
-            <div className={styles.modalOverlay}>
-              <div className={styles.modal}>
-                <h2
-                  className={styles.titulo}
-                  style={{ fontSize: "1.3rem", marginBottom: 16 }}
-                >
-                  Confirmar Exclusão
-                </h2>
-                <p>
-                  Tem certeza que deseja excluir o produto{" "}
-                  <b>{itemToDelete?.nome}</b>?
-                </p>
-                <div className={styles.modalBotoes}>
-                  <button
-                    className={`${styles.btn} ${styles.btnExcluir}`}
-                    onClick={() => setShowDeleteModal(false)}
-                  >
-                    Não
-                  </button>
-                  <button
-                    className={`${styles.btn} ${styles.btnAdicionar}`}
-                    onClick={handleDeleteProduto}
-                  >
-                    Sim
-                  </button>
-                </div>
-              </div>
+          {/* Abas */}
+          <div className={styles.tabsContainer}>
+            <button
+              className={`${styles.tab} ${activeTab === "estoque" ? styles.tabActive : ""}`}
+              onClick={() => setActiveTab("estoque")}
+            >
+              Itens em Estoque
+            </button>
+            <button
+              className={`${styles.tab} ${activeTab === "doacoes" ? styles.tabActive : ""}`}
+              onClick={() => setActiveTab("doacoes")}
+            >
+              Doações Recebidas
+            </button>
+            <button
+              className={`${styles.tab} ${activeTab === "repasses" ? styles.tabActive : ""}`}
+              onClick={() => setActiveTab("repasses")}
+            >
+              Repasses Realizados
+            </button>
+          </div>
+
+          {loading ? (
+            <p className={styles.loadingText}>Carregando dados...</p>
+          ) : activeTab === "estoque" ? (
+            <div className={styles.tableWrapper}>
+              <table className={styles.tabela}>
+                <thead>
+                  <tr>
+                    <th>Tipo</th>
+                    <th>Categoria</th>
+                    <th>Tamanho</th>
+                    <th>Quantidade</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {estoque.length === 0 ? (
+                    <tr><td colSpan={4} className={styles.emptyCell}>Nenhum item em estoque.</td></tr>
+                  ) : (
+                    estoque.map((item) => (
+                      <tr key={item.id}>
+                        <td>{item.tipo}</td>
+                        <td>{item.categoria}</td>
+                        <td>{item.tamanho}</td>
+                        <td>{item.quantidade}</td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
             </div>
-=======
-          {!loading && items.length === 0 && (
-            <p style={{ color: "#6b7280", marginTop: 20 }}>
-              Nenhum item no estoque.
-            </p>
->>>>>>> Stashed changes
+          ) : activeTab === "doacoes" ? (
+            <div className={styles.tableWrapper}>
+              {doacoes.length === 0 ? (
+                <p className={styles.emptyText}>Nenhuma doação registrada.</p>
+              ) : (
+                doacoes.map((doacao) => (
+                  <div key={doacao.id} className={styles.cardGroup}>
+                    <div className={styles.cardHeader}>
+                      <span><strong>Data:</strong> {doacao.data}</span>
+                      <span><strong>Doador ID:</strong> {doacao.doadorId}</span>
+                    </div>
+                    <table className={styles.tabelaInner}>
+                      <thead>
+                        <tr>
+                          <th>Tipo</th>
+                          <th>Categoria</th>
+                          <th>Tamanho</th>
+                          <th>Quantidade</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {doacao.itens.map((item, idx) => (
+                          <tr key={idx}>
+                            <td>{item.tipo}</td>
+                            <td>{item.categoria}</td>
+                            <td>{item.tamanho}</td>
+                            <td>{item.quantidade}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ))
+              )}
+            </div>
+          ) : (
+            <div className={styles.tableWrapper}>
+              {repasses.length === 0 ? (
+                <p className={styles.emptyText}>Nenhum repasse registrado.</p>
+              ) : (
+                repasses.map((repasse) => (
+                  <div key={repasse.id} className={styles.cardGroup}>
+                    <div className={styles.cardHeader}>
+                      <span><strong>Data:</strong> {repasse.data}</span>
+                      <span><strong>Beneficiário ID:</strong> {repasse.beneficiarioId}</span>
+                    </div>
+                    <table className={styles.tabelaInner}>
+                      <thead>
+                        <tr>
+                          <th>Tipo</th>
+                          <th>Categoria</th>
+                          <th>Tamanho</th>
+                          <th>Quantidade</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {repasse.itens.map((item, idx) => (
+                          <tr key={item.id || idx}>
+                            <td>{item.tipo}</td>
+                            <td>{item.categoria}</td>
+                            <td>{item.tamanho}</td>
+                            <td>{item.quantidade}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ))
+              )}
+            </div>
           )}
         </main>
       </div>
